@@ -1,0 +1,14 @@
+#pragma link C++ class SiWEcalSSInfo+;
+#pragma link C++ class SiWEcalSSEvent+;
+#pragma link C++ class SiWEcalSSSamplingSection+;
+#pragma link C++ class vector<SiWEcalSSSamplingSection>+;
+#pragma link C++ class SiWEcalSSSimHit+;
+#pragma link C++ class vector<SiWEcalSSSimHit>+;
+#pragma link C++ class SiWEcalSSGenParticle+;
+#pragma link C++ class vector<SiWEcalSSGenParticle>+;
+#pragma link C++ class SiWEcalSSRecoHit+;
+#pragma link C++ class vector<SiWEcalSSRecoHit>+;
+#pragma link C++ class SiWEcalSSRecoJet+;
+#pragma link C++ class vector<SiWEcalSSRecoJet>+;
+#pragma link C++ class SiWEcalSSCluster+;
+#pragma link C++ class vector<SiWEcalSSCluster>+;

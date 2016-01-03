@@ -1,0 +1,3 @@
+#include "SiWEcalSSInfo.hh"
+
+//dummy

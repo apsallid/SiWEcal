@@ -1,0 +1,729 @@
+#include<string>
+#include<set>
+#include<iostream>
+#include<fstream>
+#include<sstream>
+#include <boost/algorithm/string.hpp>
+
+#include "TFile.h"
+#include "TTree.h"
+#include "TChain.h"
+#include "TNtuple.h"
+#include "TH2D.h"
+#include "TH1F.h"
+#include "TCanvas.h"
+#include "TStyle.h"
+#include "TRandom3.h"
+#include "Math/Vector4D.h"
+
+#include "fastjet/ClusterSequence.hh"
+
+#include "SiWEcalSSEvent.hh"
+#include "SiWEcalSSInfo.hh"
+#include "SiWEcalSSSimHit.hh"
+#include "SiWEcalSSRecoHit.hh"
+#include "SiWEcalSSRecoJet.hh"
+#include "SiWEcalSSCalibration.hh"
+#include "SiWEcalSSDigitisation.hh"
+#include "SiWEcalSSDetector.hh"
+#include "SiWEcalSSGeometryConversion.hh"
+
+using namespace fastjet;
+
+template <class T>
+void extractParameterFromStr(std::string aStr,T & vec){ 
+  if (aStr == "") return;
+  std::vector<std::string> layVec;
+  boost::split( layVec, aStr, boost::is_any_of(","));
+
+  for (unsigned iE(0); iE<layVec.size(); ++iE){//loop on elements
+    std::vector<std::string> lPair;
+    boost::split( lPair, layVec[iE], boost::is_any_of(":"));
+    if (lPair.size() != 2) {
+      std::cout << " -- Wrong string for parameter given as input:" << layVec[iE] << " Try again, expecting exactly one symbol \":\" between two \",\" ..." << std::endl;
+      exit(1);
+    }
+    std::vector<std::string> lLay;
+    boost::split( lLay, lPair[0], boost::is_any_of("-"));
+    if (lLay.size() > 2) {
+      std::cout << " -- Wrong string for granularities given as input:" << lPair[0] << " Try again, expecting at most one symbol \"-\"." << std::endl;
+      exit(1);
+    }
+    unsigned beginIdx =  atoi(lLay[0].c_str());
+    unsigned endIdx = lLay.size() == 1 ? beginIdx :  atoi(lLay[1].c_str());
+    for (unsigned iL(beginIdx); iL<endIdx+1; ++iL){
+      if (iL < vec.size())
+	std::istringstream(lPair[1])>>vec[iL];
+      else {
+	std::cout << " -- WARNING! Input parameter has more layers: " << endIdx << " than detector : " 
+		  << vec.size()
+		  << ". Ignoring additional layer #" << iL << "... PLEASE CHECK SETTINGS ARE CORRECT FOR EXISTING LAYERS!!"
+		  << std::endl;
+      }
+    }
+  }//loop on elements
+}
+
+void processHist(const unsigned iL,
+		 const bool doSmall,
+		 const TH2D* histE,
+		 SiWEcalSSDigitisation & myDigitiser,
+		 TH1F* & p_noise,
+		 const TH2D* histZ,
+		 const double & meanZpos,
+		 const bool isTBsetup,
+		 const SiWEcalSSSubDetector & subdet,
+		 const std::vector<unsigned> & pThreshInADC,
+		 const bool pSaveDigis,
+		 SiWEcalSSRecoHitVec & lDigiHits,
+		 SiWEcalSSRecoHitVec & lRecoHits,
+		 const bool pMakeJets,
+		 std::vector<PseudoJet> & lParticles
+		 ){
+
+  DetectorEnum adet = subdet.type;
+  bool isScint = subdet.isScint;
+  bool isSi = subdet.isSi;
+
+  double rLim = subdet.radiusLim;
+
+  for (int iX(1); iX<histE->GetNbinsX()+1;++iX){
+    for (int iY(1); iY<histE->GetNbinsY()+1;++iY){
+
+      double x = histE->GetXaxis()->GetBinCenter(iX);
+      double y = histE->GetYaxis()->GetBinCenter(iY);
+      double radius = sqrt(pow(x,2)+pow(y,2));
+
+      //if (iY==1) std::cout << " Layer " << iL << " " << x << " " << y << std::endl;
+
+      if ( (doSmall && radius >= rLim) ||
+	   (!doSmall && radius < rLim && !isScint) ) continue;
+
+      double digiE = 0;
+      double simE = histE->GetBinContent(iX,iY);
+      //double time = 0;
+      //if (simE>0) time = histTime->GetBinContent(iX,iY)/simE;
+      
+      //fill vector with neighbours and calculate cross-talk
+      double xtalkE = simE;
+      if (isScint){
+	std::vector<double> simEvec;
+	simEvec.push_back(simE);
+	if (iX>1) simEvec.push_back(histE->GetBinContent(iX-1,iY));
+	if (iX<histE->GetNbinsX()) simEvec.push_back(histE->GetBinContent(iX+1,iY));
+	if (iY>1) simEvec.push_back(histE->GetBinContent(iX,iY-1));
+	if (iY<histE->GetNbinsY()) simEvec.push_back(histE->GetBinContent(iX,iY+1));
+	xtalkE = myDigitiser.ipXtalk(simEvec);
+      }
+      
+      //bool passTime = myDigitiser.passTimeCut(adet,time);
+      //if (!passTime) continue;
+      
+      double posz = meanZpos;
+      //for noise only hits
+      //if (simE>0) posz = histZ->GetBinContent(iX,iY)/simE;
+      //else posz = meanZpos;
+
+      
+      //if (fabs(x) > 500 || fabs(y)>500) std::cout << " x=" << x << ", y=" << y << std::endl;
+      
+
+      //correct for particle angle in conversion to MIP
+      double simEcor = isTBsetup ? xtalkE : myDigitiser.mipCor(xtalkE,x,y,posz);
+      digiE = simEcor;
+      
+      if (isScint && simEcor>0) {
+	digiE = myDigitiser.digiE(simEcor);
+      }
+      myDigitiser.addNoise(digiE,iL,p_noise);
+      
+      double noiseFrac = 1.0;
+      if (simEcor>0) noiseFrac = (digiE-simEcor)/simEcor;
+      
+      //for silicon-based Calo
+      unsigned adc = 0;
+      if (isSi){
+	adc = myDigitiser.adcConverter(digiE,adet);
+	digiE = myDigitiser.adcToMIP(adc,adet);
+      }
+      bool aboveThresh = //digiE > 0.5;
+	(isSi && adc > pThreshInADC[iL]) ||
+	(isScint && digiE > pThreshInADC[iL]*myDigitiser.adcToMIP(1,adet,false));
+      //histE->SetBinContent(iX,iY,digiE);
+      if ((!pSaveDigis && aboveThresh) ||
+	  pSaveDigis)
+	{//save hits
+	  //double calibE = myDigitiser.MIPtoGeV(subdet,digiE);
+	  SiWEcalSSRecoHit lRecHit;
+	  lRecHit.layer(iL);
+	  lRecHit.energy(digiE);
+	  lRecHit.adcCounts(adc);
+	  lRecHit.x(x);
+	  lRecHit.y(y);
+	  lRecHit.z(posz);
+	  lRecHit.noiseFraction(noiseFrac);
+	  //unsigned x_cell = static_cast<unsigned>(fabs(x)/(cellSize*granularity[iL]));
+	  //unsigned y_cell = static_cast<unsigned>(fabs(y)/(cellSize*granularity[iL]));
+	  //lRecHit.encodeCellId(x>0,y>0,x_cell,y_cell,granularity[iL]);
+	  
+	  if (pSaveDigis) lDigiHits.push_back(lRecHit);
+	  
+	  lRecoHits.push_back(lRecHit);
+	  
+	  if (pMakeJets){
+	    if (posz>0) lParticles.push_back( PseudoJet(lRecHit.px(),lRecHit.py(),lRecHit.pz(),lRecHit.E()));
+	  }
+	  
+	}//save hits
+    }//loop on y
+  }//loop on x
+     
+}//processHist
+
+
+
+int main(int argc, char** argv){//main  
+
+  /////////////////////////////////////////////////////////////
+  //parameters
+  /////////////////////////////////////////////////////////////
+  const unsigned nReqA = 11;
+  const unsigned nPar = static_cast<unsigned>(argc);
+  if (nPar < nReqA-1) {
+    std::cout << " Usage: "
+              << argv[0] << " <nEvts to process (0=all)>"<< std::endl
+              << "<full path to input file>"<< std::endl
+              << "<full path to output file>"<< std::endl
+              << "<granularities \"layer_i-layer_j:factor,layer:factor,...\">"<< std::endl
+              << "<noise (in Mips) \"layer_i-layer_j:factor,layer:factor,...\">"<< std::endl
+              << "<threshold (in ADC counts) \"layer_i-layer_j:factor,layer:factor,...\">"<< std::endl
+              << "<intercalib factor in %>" << std::endl
+	      << "<Number of si layers for TB setups>" << std::endl
+              << "<number of PU>" << std::endl
+              << "<full path to MinBias file if nPU!=0>" << std::endl
+              << std::endl
+              << "<optional: randomSeed (default=0)> "  << std::endl
+              << "<optional: debug (default=0)>" << std::endl
+              << "<optional: save sim hits (default=0)> " << std::endl
+              << "<optional: save digi hits (default=0)> " << std::endl
+              << "<optional: make jets (default=0)> " << std::endl
+              << std::endl;
+    return 1;
+  }
+
+  const unsigned pNevts = atoi(argv[1]);
+  std::string inFilePath = argv[2];
+  std::string outFilePath = argv[3];
+  std::string granulStr = argv[4];
+  std::string noiseStr = argv[5];
+  std::string threshStr = argv[6];
+  const unsigned interCalib = atoi(argv[7]);
+  const unsigned nSiLayers = atoi(argv[8]);
+  const unsigned nPU = atoi(argv[9]);
+  std::string puPath;
+  if (nPar > nReqA-1) puPath = argv[10];
+  if (nPU>0 && puPath.size()==0) {
+    std::cout << " -- Error! Missing full path to minbias file. Exiting." << std::endl;
+    return 1;
+  }
+
+  std::cout << " ----------------------------------------" << std::endl
+            << " -- Input parameters: " << std::endl
+            << " -- Input file path: " << inFilePath << std::endl
+            << " -- Output file path: " << outFilePath << std::endl
+            << " -- Processing " ;
+  if (pNevts>0) std::cout << pNevts;
+  else std::cout << "all";
+  std::cout << " events." << std::endl
+            << " -- Granularities: " << granulStr << std::endl
+            << " -- noise: " << noiseStr << std::endl
+            << " -- thresholds: " << threshStr << std::endl
+            << " -- intercalibration factor (in %): " << interCalib << std::endl
+            << " -- number of PU: " << nPU << std::endl
+	    << " -- pu file path: " << puPath << std::endl
+    ;
+
+	    
+  //std::string pModel = "model2";
+  unsigned debug = 0;
+  unsigned pSeed = 0;
+  bool pSaveDigis = 0;
+  bool pSaveSims = 0;
+  bool pMakeJets = false;
+  //if (nPar > nReqA-1) pModel = argv[nReqA];
+  if (nPar > nReqA) std::istringstream(argv[nReqA])>>pSeed;
+  if (nPar > nReqA+1) {
+    debug = atoi(argv[nReqA+1]);
+    std::cout << " -- DEBUG output is set to " << debug << std::endl;
+  }
+  if (nPar > nReqA+2) std::istringstream(argv[nReqA+2])>>pSaveDigis;
+  if (nPar > nReqA+3) std::istringstream(argv[nReqA+3])>>pSaveSims;
+  if (nPar > nReqA+4) std::istringstream(argv[nReqA+4])>>pMakeJets;
+  
+  //try to get model automatically
+  //if (inFilePath.find("model0")!=inFilePath.npos) pModel = "model0";
+  //else if (inFilePath.find("model1")!=inFilePath.npos) pModel = "model1";
+  //else if (inFilePath.find("model2")!=inFilePath.npos) pModel = "model2";
+  //else if (inFilePath.find("model3")!=inFilePath.npos) pModel = "model3";
+
+
+  //std::cout << " -- Model is set to : " << pModel << std::endl;
+  std::cout<< " -- Random seed will be set to : " << pSeed << std::endl;
+  if (pSaveDigis) std::cout << " -- DigiHits are saved." << std::endl;
+  if (pSaveSims) std::cout << " -- SimHits are saved." << std::endl;
+  if (pMakeJets) std::cout << " -- Making jets." << std::endl;
+  std::cout << " ----------------------------------------" << std::endl;
+  
+  //////////////////////////////////////////////////////////
+  //// Hardcoded config ////////////////////////////////////
+  //////////////////////////////////////////////////////////
+  //for HGCAL, true means only 12 FHCAL layers considered (24 are simulated)
+  bool concept = true;
+
+  // choose a jet definition
+  double R = 0.5;
+  JetDefinition jet_def(antikt_algorithm, R);
+
+  //////////////////////////////////////////////////////////
+  //// End Hardcoded config ////////////////////////////////////
+  //////////////////////////////////////////////////////////
+
+
+  /////////////////////////////////////////////////////////////
+  //input
+  /////////////////////////////////////////////////////////////
+
+  std::string inputStr = inFilePath ;
+  TFile *inputFile = TFile::Open(inputStr.c_str());
+  
+  if (!inputFile) {
+    std::cout << " -- Error, input file " << inputStr << " cannot be opened. Exiting..." << std::endl;
+    return 1;
+  }
+
+  TTree *inputTree = (TTree*)inputFile->Get("SiWEcalSSTree");
+  if (!inputTree){
+    std::cout << " -- Error, tree SiWEcalSSTree  cannot be opened. Exiting..." << std::endl;
+    return 1;
+  }
+
+  /////////////////////////////////////////////////////////////
+  //  //input PU hits
+  /////////////////////////////////////////////////////////////
+
+  bool signalIsPu = false;
+
+  TChain *puTree = new TChain("SiWEcalSSTree");
+  unsigned nPuVtx = 0;
+  unsigned nPuEvts = 0;
+  std::vector<SiWEcalSSSimHit> * puhitvec = 0;
+  if(nPU!=0){
+     ofstream myscript;
+     myscript.open("eosls.sh");
+     myscript<<"#!/bin/bash" << std::endl;
+     myscript<<"/afs/cern.ch/project/eos/installation/0.3.15/bin/eos.select ls " << puPath << std::endl; 
+     myscript.close();
+     FILE *script = popen("bash eosls.sh", "r");
+     char eoslsName[100];
+     while(fgets(eoslsName, 100, script)) {
+        std::ostringstream puInput;
+        std::string temp = std::string(eoslsName).substr(0,strlen(eoslsName)-1);
+        if(temp.find("Digi")!=temp.npos)continue;
+        puInput << puPath << temp;
+	if (puInput.str()==inFilePath) {
+	  std::cout << " -- duplicate: file already used as signal. Removing." << std::endl; 
+	  signalIsPu = true;
+	  continue;
+	}
+        puTree->AddFile(puInput.str().c_str());
+        std::cout << "Adding MinBias file:" << puInput.str().c_str() << std::endl;
+     }
+     pclose(script);  
+     system("rm ./eosls.sh");
+
+    puTree->SetBranchAddress("SiWEcalSSSimHitVec",&puhitvec);
+
+    nPuEvts = puTree->GetEntries();
+    std::cout << "- Number of PU events available: " << nPuEvts  << std::endl;
+  }
+  /////////////////////////////////////////////////////////////
+  //input tree
+  /////////////////////////////////////////////////////////////
+
+  SiWEcalSSInfo * info=(SiWEcalSSInfo*)inputFile->Get("Info");
+  const double cellSize = info->cellSize();
+  const unsigned versionNumber = info->version();
+  const unsigned model = info->model();
+  
+  //models 0,1 or 3.
+  bool isTBsetup = (model != 2);
+  if (isTBsetup) std::cout << " -- Number of Si layers: " << nSiLayers << std::endl;
+  else std::cout << " -- Number of Si layers ignored: hardcoded as a function of radius in SiWEcalSSGeometryConversion class." << std::endl;
+
+
+  SiWEcalSSEvent * event=0;
+  std::vector<SiWEcalSSSimHit> * hitvec = 0;
+
+  inputTree->SetBranchAddress("SiWEcalSSEvent",&event);
+  inputTree->SetBranchAddress("SiWEcalSSSimHitVec",&hitvec);
+    
+  //initialise detector
+  SiWEcalSSDetector & myDetector = theDetector();
+  bool isCaliceHcal = versionNumber==23;//inFilePath.find("version23")!=inFilePath.npos || inFilePath.find("version_23")!=inFilePath.npos;
+
+  //unsigned versionNumber = 0;
+  //unsigned nchar = 0;
+  //if (inFilePath.substr(inFilePath.find("version")+8,1)=="_") nchar = 1;
+  //else nchar = 2;
+  //std::string lvers = inFilePath.substr(inFilePath.find("version")+7,nchar);
+  //std::istringstream(lvers)>>versionNumber;
+  
+  std::cout << " -- Version number is : " << versionNumber 
+	    << ", model = " << model
+	    << ", cellSize = " << cellSize
+	    << std::endl;
+
+  bool bypassR = false;
+  if (isTBsetup) bypassR = true;
+  myDetector.buildDetector(versionNumber,concept,isCaliceHcal,bypassR);
+
+  //initialise calibration class
+  SiWEcalSSCalibration mycalib(inFilePath,bypassR,nSiLayers);
+
+  const unsigned nLayers = myDetector.nLayers();
+
+  SiWEcalSSGeometryConversion geomConv(inFilePath,model,cellSize,bypassR,nSiLayers);
+  //const double xWidth = geomConv.getXYwidth();
+
+  SiWEcalSSDigitisation myDigitiser;
+
+  std::vector<unsigned> granularity;
+  granularity.resize(nLayers,1);
+  std::vector<double> pNoiseInMips;
+  pNoiseInMips.resize(nLayers,0.12);
+  std::vector<unsigned> pThreshInADC;
+  pThreshInADC.resize(nLayers,5);
+
+  extractParameterFromStr<std::vector<unsigned> >(granulStr,granularity);
+  extractParameterFromStr<std::vector<double> >(noiseStr,pNoiseInMips);
+  extractParameterFromStr<std::vector<unsigned> >(threshStr,pThreshInADC);
+
+  //unsigned nbCells = 0;
+
+  std::cout << " -- Granularities and noise are setup like this:" << std::endl;
+  for (unsigned iL(0); iL<nLayers; ++iL){
+    std::cout << "Layer " ;
+    if (iL<10) std::cout << " ";
+    std::cout << iL << " : " << granularity[iL] << ", " << pNoiseInMips[iL] << " mips, " << pThreshInADC[iL] << " adc - ";
+    if (iL%5==4) std::cout << std::endl;
+    myDigitiser.setNoise(iL,pNoiseInMips[iL]);
+    //nbCells += N_CELLS_XY_MAX/(granularity[iL]*granularity[iL]);
+  }
+  std::cout << std::endl;     
+  //std::cout << " -- Total number of cells = " << nbCells << std::endl;
+
+  geomConv.setGranularity(granularity);
+  geomConv.initialiseHistos();
+
+  TRandom3 *lRndm = new TRandom3();
+  lRndm->SetSeed(pSeed);
+  myDigitiser.setRandomSeed(pSeed);
+
+  std::cout << " -- Random3 seed = " << lRndm->GetSeed() << std::endl
+	    << " ----------------------------------------" << std::endl;
+
+  myDigitiser.setIntercalibrationFactor(interCalib);
+
+  /////////////////////////////////////////////////////////////
+  //output
+  /////////////////////////////////////////////////////////////
+
+  std::ostringstream outputStr;
+  outputStr << outFilePath << "/DigiPFcal" ;
+  if (pSaveDigis)  outputStr << "_withDigiHits";
+  if (pSaveSims)  outputStr << "_withSimHits";
+  outputStr << ".root";
+  
+  TFile *outputFile = TFile::Open(outputStr.str().c_str(),"RECREATE");
+
+  if (!outputFile) {
+    std::cout << " -- Error, output file " << outputStr.str() << " cannot be opened. Exiting..." << std::endl;
+    return 1;
+  }
+  else {
+    std::cout << " -- File will be saved as " << outputStr.str() << std::endl;
+  }
+
+  SiWEcalSSInfo *lInfo = new SiWEcalSSInfo();
+  lInfo->cellSize(cellSize);
+  lInfo->version(versionNumber);
+  lInfo->model(model);
+
+  TTree *outputTree = new TTree("RecoTree","HGC Standalone simulation reco tree");
+  SiWEcalSSSimHitVec lSimHits;
+  SiWEcalSSRecoHitVec lDigiHits;
+  SiWEcalSSRecoHitVec lRecoHits;
+  SiWEcalSSRecoJetVec lCaloJets;
+  unsigned maxSimHits = 0;
+  unsigned maxRecHits = 0;
+  unsigned maxRecJets = 0;
+  SiWEcalSSEvent lEvent;
+  outputTree->Branch("SiWEcalSSEvent",&lEvent);
+  if (nPU!=0) outputTree->Branch("nPuVtx",&nPuVtx);
+  if (pSaveSims) outputTree->Branch("SiWEcalSSSimHitVec","std::vector<SiWEcalSSSimHit>",&lSimHits);
+  if (pSaveDigis) outputTree->Branch("SiWEcalSSDigiHitVec","std::vector<SiWEcalSSRecoHit>",&lDigiHits);
+  outputTree->Branch("SiWEcalSSRecoHitVec","std::vector<SiWEcalSSRecoHit>",&lRecoHits);
+  if (pMakeJets) outputTree->Branch("SiWEcalSSRecoJetVec","std::vector<SiWEcalSSRecoJet>",&lCaloJets);
+  TH1F * p_noise = new TH1F("noiseCheck",";noise (MIPs)",100,-5,5);
+
+
+  /////////////////////////////////////////////////////////////
+  //Loop on events
+  /////////////////////////////////////////////////////////////
+
+  const unsigned nEvts = (pNevts > inputTree->GetEntries() || pNevts==0) ? static_cast<unsigned>(inputTree->GetEntries()) : pNevts;
+
+  std::cout << "- Processing = " << nEvts  << " events out of " << inputTree->GetEntries() << std::endl;
+
+  std::vector<PseudoJet> lParticles;
+
+  for (unsigned ievt(0); ievt<nEvts; ++ievt){//loop on entries
+
+    inputTree->GetEntry(ievt);
+    lEvent.eventNumber(event->eventNumber());
+    lEvent.vtx_x(event->vtx_x());
+    lEvent.vtx_y(event->vtx_y());
+    lEvent.vtx_z(event->vtx_z());
+    //unsigned layer = volNb;
+    
+    mycalib.setVertex(lEvent.vtx_x(),lEvent.vtx_y(),lEvent.vtx_z());
+
+    if (debug>0) {
+      std::cout << " **DEBUG** Processing evt " << ievt << std::endl;
+    }
+    else if (ievt%50 == 0) std::cout << "... Processing event: " << ievt << std::endl;
+    
+
+    unsigned prevLayer = 10000;
+    DetectorEnum type = DetectorEnum::FECAL;
+    unsigned subdetLayer=0;
+    for (unsigned iH(0); iH<(*hitvec).size(); ++iH){//loop on hits
+      SiWEcalSSSimHit lHit = (*hitvec)[iH];
+
+      //do not save hits with 0 energy...
+      if (lHit.energy()>0 && pSaveSims) lSimHits.push_back(lHit);
+      unsigned layer = lHit.layer();
+      if (layer != prevLayer){
+	const SiWEcalSSSubDetector & subdet = myDetector.subDetectorByLayer(layer);
+	type = subdet.type;
+	subdetLayer = layer-subdet.layerIdMin;
+	prevLayer = layer;
+	if (debug > 1) std::cout << " - layer " << layer << " " << subdet.name << " " << subdetLayer << std::endl;
+      }
+      double posx = lHit.get_x(cellSize);
+      double posy = lHit.get_y(cellSize);
+      double radius = sqrt(pow(posx,2)+pow(posy,2));
+      double posz = lHit.get_z();
+      double energy = lHit.energy()*mycalib.MeVToMip(layer,radius);
+      double realtime = mycalib.correctTime(lHit.time(),posx,posy,posz);
+      bool passTime = myDigitiser.passTimeCut(type,realtime);
+      if (!passTime) continue;
+      if (energy>0 && 
+	  lHit.silayer() < geomConv.getNumberOfSiLayers(type,radius) 
+	  ){
+	if (debug > 1) std::cout << " hit " << iH 
+				 << " lay " << layer  
+				 << " x " << posx 
+				 << " y " << posy
+				 << " z " << posz
+				 << " t " << lHit.time() << " " << realtime
+				 << std::endl;
+	geomConv.fill(type,subdetLayer,energy,realtime,posx,posy,posz);
+      }
+
+    }//loop on input simhits
+
+    if(nPU!=0){
+      //get PU events
+      //std::vector<unsigned> ipuevt;
+
+      //get poisson <140>
+      nPuVtx = lRndm->Poisson(nPU);
+      //ipuevt.resize(nPuVtx,1);
+      if (signalIsPu) nPuVtx -= 1;
+      std::cout << " -- Adding " << nPuVtx << " events to signal event: " << ievt << std::endl;
+      std::set<unsigned> lidxSet;
+      for (unsigned iV(0); iV<nPuVtx; ++iV){//loop on interactions
+        unsigned ipuevt = 0;
+	while (1){
+	  ipuevt = lRndm->Integer(nPuEvts);
+	  if (lidxSet.find(ipuevt)==lidxSet.end()){
+	    lidxSet.insert(ipuevt);
+	    break;
+	  }
+	  else {
+	    std::cout << " -- Found duplicate ! Taking another shot." << std::endl;
+	  }
+	}
+	//std::cout << " ---- adding evt " << ipuevt << std::endl;
+	
+        puTree->GetEntry(ipuevt);
+        //lRecoHits.reserve(lRecoHits.size()+(*puhitvec).size());
+        prevLayer = 10000;
+        type = DetectorEnum::FECAL;
+        subdetLayer=0;
+        for (unsigned iH(0); iH<(*puhitvec).size(); ++iH){//loop on hits
+          SiWEcalSSSimHit lHit = (*puhitvec)[iH];
+	  if (lHit.energy()>0){
+	    unsigned layer = lHit.layer();
+	    if (layer != prevLayer){
+	      const SiWEcalSSSubDetector & subdet = myDetector.subDetectorByLayer(layer);
+	      type = subdet.type;
+	      subdetLayer = layer-subdet.layerIdMin;
+	      prevLayer = layer;
+	      //std::cout << " - layer " << layer << " " << subdet.name << " " << subdetLayer << std::endl;
+	    }
+	    double posx = lHit.get_x(cellSize);
+	    double posy = lHit.get_y(cellSize);
+	    double posz = lHit.get_z();
+	    double radius = sqrt(pow(posx,2)+pow(posy,2));
+	    if (lHit.silayer() < geomConv.getNumberOfSiLayers(type,radius)){
+	      double energy = lHit.energy()*mycalib.MeVToMip(layer,radius);
+	      double realtime = mycalib.correctTime(lHit.time(),posx,posy,posz);
+	      bool passTime = myDigitiser.passTimeCut(type,realtime);
+	      if (!passTime) continue;
+	      
+	      if (debug > 1) std::cout << " hit " << iH
+				       << " lay " << layer
+				       << " x " << posx
+				       << " y " << posy
+				       << " z " << posz
+				       << " t " << lHit.time() << " " << realtime
+				       << std::endl;
+	      geomConv.fill(type,subdetLayer,energy,realtime,posx,posy,posz);
+	    }
+	  }
+
+        }//loop on hits
+      }//loop on interactions
+    }//add PU
+
+    if (debug>1) {
+      std::cout << " **DEBUG** simhits = " << (*hitvec).size() << " " << lSimHits.size() << std::endl;
+    }
+
+    //create hits, everywhere to have also pure noise
+    //digitise
+    //apply threshold
+    //save
+    unsigned nTotBins = 0;
+    for (unsigned iL(0); iL<nLayers; ++iL){//loop on layers
+      TH2D *histE = geomConv.get2DHist(iL,"E");
+      TH2D *histEs = geomConv.get2DHist(iL,"ESmall");
+      TH2D *histTime = geomConv.get2DHist(iL,"Time");
+      TH2D *histZ = geomConv.get2DHist(iL,"Z");
+      const SiWEcalSSSubDetector & subdet = myDetector.subDetectorByLayer(iL);
+      bool isScint = subdet.isScint;
+      nTotBins += histE->GetNbinsX()*histE->GetNbinsY();
+      if (pSaveDigis) lDigiHits.reserve(nTotBins);
+
+      double meanZpos = geomConv.getAverageZ(iL);
+      
+      //std::cout << iL << " " << meanZpos << std::endl;
+
+      if (debug>1){
+	std::cout << " -- Layer " << iL << " " << subdet.name << " z=" << meanZpos
+		  << " totbins = " << nTotBins << " histE entries = " << histE->GetEntries() << std::endl;
+      }
+
+      //cell-to-cell cross-talk for scintillator
+      if (isScint){
+	//2.5% per 30-mm edge
+	myDigitiser.setIPCrossTalk(0.025*histE->GetXaxis()->GetBinWidth(1)/30.);
+      }
+      else {
+	myDigitiser.setIPCrossTalk(0);
+      }
+
+      processHist(iL,false,histE,myDigitiser,p_noise,histZ,meanZpos,isTBsetup,subdet,pThreshInADC,pSaveDigis,lDigiHits,lRecoHits,pMakeJets,lParticles);
+      if (!isScint && !bypassR) processHist(iL,true,histEs,myDigitiser,p_noise,histZ,meanZpos,isTBsetup,subdet,pThreshInADC,pSaveDigis,lDigiHits,lRecoHits,pMakeJets,lParticles);
+ 
+    }//loop on layers
+
+    if (debug) {
+      std::cout << " **DEBUG** sim-digi-reco hits = " << (*hitvec).size() << "-" << lDigiHits.size() << "-" << lRecoHits.size() << std::endl;
+    }
+    
+    
+    if (pMakeJets){//pMakeJets
+      
+      // run the clustering, extract the jets
+      ClusterSequence cs(lParticles, jet_def);
+      std::vector<PseudoJet> jets = sorted_by_pt(cs.inclusive_jets());
+      
+      // print the jets
+      std::cout <<   "-- evt " << ievt << ": found " << jets.size() << " Jets." << std::endl;
+      for (unsigned i = 0; i < jets.size(); i++) {
+	const PseudoJet & lFastJet = jets[i];
+	//TOFIX // inverted y and z...
+	SiWEcalSSRecoJet ljet(lFastJet.px(),
+			  lFastJet.py(),
+			  lFastJet.pz(),
+			  lFastJet.E());
+	if (lFastJet.has_constituents()) ljet.nConstituents(lFastJet.constituents().size());
+	if (lFastJet.has_area()){
+	  ljet.area(lFastJet.area());
+	  ljet.area_error(lFastJet.area_error());
+	}
+	
+	lCaloJets.push_back(ljet);
+	std::cout << " -------- jet " << i << ": "
+		  << lFastJet.E() << " " 
+		  << lFastJet.perp() << " " 
+		  << lFastJet.rap() << " " << lFastJet.phi() << " "
+		  << lFastJet.constituents().size() << std::endl;
+	// std::vector<PseudoJet> constituents = lFastJet.constituents();
+	// for (unsigned j = 0; j < constituents.size(); j++) {
+	//   std::cout << "    constituent " << j << "'s pt: " << constituents[j].perp()
+	// 	      << std::endl;
+	// }
+      }
+      
+    }//pMakeJets
+    
+    outputTree->Fill();
+    //reserve necessary space and clear vectors.
+    if (lSimHits.size() > maxSimHits) {
+      maxSimHits = 2*lSimHits.size();
+      std::cout << " -- INFO: event " << ievt << " maxSimHits updated to " << maxSimHits << std::endl;
+    }
+    if (lRecoHits.size() > maxRecHits) {
+      maxRecHits = 2*lRecoHits.size();
+      std::cout << " -- INFO: event " << ievt << " maxRecHits updated to " << maxRecHits << std::endl;
+    }
+    if (lCaloJets.size() > maxRecJets) {
+      maxRecJets = 2*lCaloJets.size();
+      std::cout << " -- INFO: event " << ievt << " maxRecJets updated to " << maxRecJets << std::endl;
+    }
+    lSimHits.clear();
+    lDigiHits.clear();
+    lRecoHits.clear();
+    lCaloJets.clear();
+    geomConv.initialiseHistos();
+    lParticles.clear();
+    if (pSaveSims) lSimHits.reserve(maxSimHits);
+    lRecoHits.reserve(maxRecHits);
+    lParticles.reserve(maxRecHits);
+    lCaloJets.reserve(maxRecJets);
+    
+  }//loop on entries
+
+  outputFile->cd();
+  outputFile->WriteObjectAny(lInfo,"SiWEcalSSInfo","Info");
+  outputTree->Write();
+  p_noise->Write();
+  outputFile->Close();
+
+  return 0;
+
+}//main
