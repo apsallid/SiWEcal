@@ -12,7 +12,7 @@
 #include "Math/Point3D.h"
 #include "Math/Point3Dfwd.h"
 
-static const float CELL_SIZE_X=2.5;//mm
+static const float CELL_SIZE_X=5.5;//mm
 static const float CELL_SIZE_Y=CELL_SIZE_X;
 
 class SiWEcalSSSimHit{
@@ -52,24 +52,24 @@ public:
   };
 
   inline unsigned layer() const {
-    return layer_/3;
+    return layer_/4;
   };
 
   inline unsigned silayer() const {
-    return layer_%3;
+    return layer_%4;
   };
 
   inline ROOT::Math::XYZPoint position() const{
     return ROOT::Math::XYZPoint(get_x()/10.,get_y()/10.,zpos_/10.);
   };
 
-  //re-encode local layer into det layer + si layer if several sensitive layers (up to 3...)
+  //re-encode local layer into det layer + si layer if several sensitive layers (up to 4...)
   inline void setLayer(const unsigned & layer, const unsigned & silayer){
-    if (silayer>2) {
-      std::cerr << " ERROR! Trying to add silayer " << silayer << ", should be less than 3..." << std::endl;
+    if (silayer>3) {
+      std::cerr << " ERROR! Trying to add silayer " << silayer << ", should be less than 4..." << std::endl;
       exit(1);
     }
-    layer_ = 3*layer+silayer;
+    layer_ = 4*layer+silayer;
     //if (silayer>0) std::cout << layer_ << " " << layer << " " << silayer << std::endl;
   };
 
