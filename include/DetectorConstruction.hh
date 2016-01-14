@@ -86,7 +86,9 @@ public:
   void SetDetModel(G4int model);
 
   void SetWThick(std::string thick);
-  
+
+  void SetGapBetweenSensorPads(G4double gapx_, G4double gapy_);
+
   /**
      @short DTOR
    */
@@ -118,6 +120,10 @@ private:
   bool addPrePCB_;
 
   std::vector<G4double> absThickW_;
+
+  //For the gap between Si sensor pad of a single layer (2x2)
+  G4double gapx;
+  G4double gapy;
 
   /**
      @short compute the calor dimensions

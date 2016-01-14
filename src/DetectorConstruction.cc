@@ -33,6 +33,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod,
   : version_(ver), model_(mod), addPrePCB_(false)
 {
   SetWThick(absThickW);
+  SetGapBetweenSensorPads(0.1*mm,0.1*mm);
 
   //radiation lengths: cf. http://pdg.lbl.gov/2012/AtomicNuclearProperties/
   //W 3.504 mm
@@ -78,13 +79,17 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod,
 	std::vector<G4double> lThick;
 	std::vector<std::string> lEle;
 	lThick.push_back(4.2*3.504*mm);lEle.push_back("W");
-	lThick.push_back(5.*0.330*mm);lEle.push_back("Si");
-	lThick.push_back(5.*0.330*mm);lEle.push_back("Si");
-	lThick.push_back(5.*0.330*mm);lEle.push_back("Si");
-	lThick.push_back(5.*0.330*mm);lEle.push_back("Si");
+	//lThick.push_back();lEle.push_back("Plexiglass");
         lThick.push_back(1.6*mm);lEle.push_back("PCB");	
-        lThick.push_back(1.5*mm);lEle.push_back("Al");
-	lThick.push_back(2.5*mm);lEle.push_back("Air");
+	lThick.push_back(0.2*mm);lEle.push_back("Air"); // this is for the glue dots
+	lThick.push_back(0.325*mm);lEle.push_back("Si"); // For visualization increase the thickness of Si Sensors by a factor of 5
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	//plastic plate here 
+	//kapton here
+        lThick.push_back(19.0*mm);lEle.push_back("Al");
+	lThick.push_back(23.0*mm);lEle.push_back("Air");
 
 	unsigned nLay = 3;
 	for(unsigned i=0; i<nLay; i++) {
@@ -136,6 +141,8 @@ void DetectorConstruction::DefineMaterials()
   m_dEdx["Cr"] = 1.046;
   m_materials["Ni"] = nistManager->FindOrBuildMaterial("G4_Ni",false); 
   m_dEdx["Ni"] = 1.307;
+  m_materials["Plexiglass"] = nistManager->FindOrBuildMaterial("G4_PLEXIGLASS",false); 
+  m_dEdx["Plexiglass"] = 0.6*m_dEdx["C"];
 
   m_materials["PCB"] = new G4Material("G10",1.700*g/cm3,4);
   m_materials["PCB"]->AddElement(nistManager->FindOrBuildElement(14), 1);
@@ -233,7 +240,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4SolidStore::GetInstance()->Clean();
 
   //world
-  G4double expHall_z = 6*m;
+  G4double expHall_z = 30*m;
   G4double expHall_x = 3*m;
   G4double expHall_y = 3*m;
 
@@ -277,9 +284,7 @@ void DetectorConstruction::buildStack(const unsigned sectorNum)
   //build the stack
   G4double zOffset(0.); //m_CalorSizeZ/2.
   G4double zOverburden(0.);
-  //Gap between the Si sensors of single layer (2x2)
-  G4double gapx = 5.*mm;
-  G4double gapy = 5.*mm;
+
   char nameBuf[10];
   G4CSGSolid *solid;
 
@@ -405,6 +410,19 @@ void DetectorConstruction::SetWThick(std::string thick)
     std::cout << absThickW_[iE] << " ";
   }
   std::cout << std::endl;
+}
+
+//Gap between the Si sensors of single layer (2x2)
+void DetectorConstruction::SetGapBetweenSensorPads(G4double gapx_, G4double gapy_)
+{
+  if ( (gapx_ <= 0) || (gapx_ <= 0) ){
+    std::cout << " Error in the gap between sensor pads: Gap_x " << gapx_ << " Gap_y " << gapy_ << std::endl;
+    std::cout << " These should be positive numbers " << std::endl;
+    exit(1);
+  } 
+  gapx = gapx_;
+  gapy = gapy_;
+  std::cout << " Setting the gap between sensor pads: Gap_x: " << gapx << " mm Gap_y: " << gapy << " mm" << std::endl;
 }
 
 G4CSGSolid *DetectorConstruction::constructSolid (std::string baseName, const G4double & width, G4double thick, bool sivol){
