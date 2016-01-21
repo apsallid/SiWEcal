@@ -137,7 +137,7 @@ private:
 
   void buildStack(const unsigned sectorNum);
 
-  G4CSGSolid *constructSolid (std::string baseName, const G4double & width, G4double thick, bool sivol);
+  G4CSGSolid *constructSolid (std::string baseName, const G4double & width, const G4double & height, G4double thick, bool sivol, bool skirocvol);
   
 
   std::vector<G4Material* > m_SensitiveMaterial;

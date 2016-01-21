@@ -80,7 +80,12 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod,
 	std::vector<std::string> lEle;
 	lThick.push_back(4.2*3.504*mm);lEle.push_back("W");
 	//lThick.push_back();lEle.push_back("Plexiglass");
-        lThick.push_back(1.6*mm);lEle.push_back("PCB");	
+	//This is for the 16 SKIROC chips
+	unsigned nChips = 16;
+	for(unsigned i=0; i<nChips; i++) {
+	  lThick.push_back(1.1*mm);lEle.push_back("PVC"); // Will correct this to be the material of SKIROC
+	}
+	lThick.push_back(1.6*mm);lEle.push_back("PCB");	
 	lThick.push_back(0.2*mm);lEle.push_back("Air"); // this is for the glue dots
 	lThick.push_back(0.325*mm);lEle.push_back("Si"); // For visualization increase the thickness of Si Sensors by a factor of 5
 	lThick.push_back(0.325*mm);lEle.push_back("Si");
@@ -240,7 +245,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4SolidStore::GetInstance()->Clean();
 
   //world
-  G4double expHall_z = 30*m;
+  G4double expHall_z = 40*m;
   G4double expHall_x = 3*m;
   G4double expHall_y = 3*m;
 
@@ -296,6 +301,8 @@ void DetectorConstruction::buildStack(const unsigned sectorNum)
       const unsigned nEle = m_caloStruct[i].n_elements;
       //index for counting Si sensitive layers 
       unsigned idx = 0;
+      //index for counting SKIROC 
+      unsigned chip_index = 0;     
 
       for (unsigned ie(0); ie<nEle;++ie){
 	std::string eleName = m_caloStruct[i].ele_name[ie];
@@ -308,27 +315,36 @@ void DetectorConstruction::buildStack(const unsigned sectorNum)
 	  idx++;
 	  sivol = true;
 	}
+	//for the chips geometry
+	bool skirocvol = false;
+	if (eleName=="PVC") {
+	  sprintf(nameBuf,"SKIROC%d_%d",int(i+1),chip_index);
+	  chip_index++;
+	  skirocvol = true;
+	}
 
 	std::string baseName(nameBuf);
 	G4double thick = m_caloStruct[i].ele_thick[ie];
-	G4double width = 88.0*mm; //Hardcoded should fix this
+	G4double width = 88.0*mm; //Hardcoded should fix these
+	G4double height = 8.5*mm; //For SKIROC
+	if (skirocvol){width = 7.1*mm;}
 
 	if(thick>0){
-	  solid = constructSolid(baseName,width,thick,sivol);
+	  solid = constructSolid(baseName,width,height,thick,sivol,skirocvol);
 	  G4LogicalVolume *logi = new G4LogicalVolume(solid, m_materials[eleName], baseName+"log");
  	  m_caloStruct[i].ele_X0[ie] = m_materials[eleName]->GetRadlen();
 	  m_caloStruct[i].ele_dEdx[ie] = m_dEdx[eleName];
 	  m_caloStruct[i].ele_L0[ie] = m_materials[eleName]->GetNuclearInterLength();
 	  G4cout << "************ " << eleName ;
-	  G4cout << " layer " << i << " dEdx=" << m_caloStruct[i].ele_dEdx[ie] << " X0=" << m_caloStruct[i].ele_X0[ie] << " L0=" << m_caloStruct[i].ele_L0[ie] << " zpos=" << zOffset+zOverburden << "mm w=" << m_caloStruct[i].ele_thick[ie] << "mm";
+	  G4cout << " layer " << i << " dEdx = " << m_caloStruct[i].ele_dEdx[ie] << " X0= " << m_caloStruct[i].ele_X0[ie] << " L0= " << m_caloStruct[i].ele_L0[ie] << " zpos=" << zOffset+zOverburden << " mm w= " << m_caloStruct[i].ele_thick[ie] << " mm";
 	  //G4cout << " d=" << m_materials[eleName]->GetDensity();
 	  //G4cout << G4endl;
 	  //G4cout << *(m_materials[eleName]->GetMaterialTable()) << G4endl;
 
 	  totalLengthX0 += m_caloStruct[i].ele_thick[ie]/m_caloStruct[i].ele_X0[ie];
-	  G4cout << " TotX0=" << totalLengthX0;// << G4endl;
+	  G4cout << " TotX0 = " << totalLengthX0;// << G4endl;
 	  totalLengthL0 += m_caloStruct[i].ele_thick[ie]/m_caloStruct[i].ele_L0[ie];
-	  G4cout << " TotLambda=" << totalLengthL0 << G4endl;
+	  G4cout << " TotLambda = " << totalLengthL0 << G4endl;
 	  
 	  //G4double xpvpos = -m_CalorSizeXY/2.;
 	  G4double xpvpos = 0.;
@@ -337,26 +353,57 @@ void DetectorConstruction::buildStack(const unsigned sectorNum)
 	  //std::cout << "Element of ele_vol is " << nEle*sectorNum  << std::endl;
 	  if (eleName=="Si"){
 	    switch (idx) {
-	    case 1: xpvpos = -width/4. - gapx; ypvpos = -width/4. - gapy; 
-	      break;
-	    case 2: xpvpos = -width/4. - gapx; ypvpos = width/4. + gapy; 
-	      break;
-	    case 3: xpvpos = width/4. + gapx; ypvpos = -width/4. - gapy; 
-	      break;
-	    case 4: xpvpos = width/4. + gapx; ypvpos = width/4. + gapy; 
-	      break;
+	    case 1: xpvpos = -width/4. - gapx; ypvpos = -width/4. - gapy; break;
+	    case 2: xpvpos = -width/4. - gapx; ypvpos = width/4. + gapy; break;
+	    case 3: xpvpos = width/4. + gapx; ypvpos = -width/4. - gapy; break;
+	    case 4: xpvpos = width/4. + gapx; ypvpos = width/4. + gapy; break;
 	    }	    
 	  }
+	  if(skirocvol){
+	    //The 4x4 structure of chips. I will assume for now that the 4 chips
+	    //are symmetrical placed in every Si pad and will take the Si pad hardcoded for now. 
+  	    G4double sipadwidth = 44.0*mm;//Should fix this !!!
+	    G4double auxdisvarx =  gapx + (sipadwidth/4.);
+	    G4double auxdisvary =  gapy + (sipadwidth/4.);
+	    switch (chip_index) {
+	    case 1: xpvpos = - auxdisvarx; ypvpos =  - auxdisvary - (sipadwidth/2.); break;
+	    case 2: xpvpos = - auxdisvarx; ypvpos =  - auxdisvary; break;
+	    case 3: xpvpos = - auxdisvarx - (sipadwidth/2.); ypvpos =  - auxdisvary - (sipadwidth/2.); break;
+	    case 4: xpvpos = - auxdisvarx - (sipadwidth/2.); ypvpos =  - auxdisvary; break;
+	      
+	    case 5: xpvpos = - auxdisvarx; ypvpos =  auxdisvary + (sipadwidth/2.); break;
+	    case 6: xpvpos = - auxdisvarx; ypvpos =  auxdisvary; break;
+	    case 7: xpvpos = - auxdisvarx - (sipadwidth/2.); ypvpos =  auxdisvary + (sipadwidth/2.); break;
+	    case 8: xpvpos = - auxdisvarx - (sipadwidth/2.); ypvpos =  auxdisvary; break;
+
+	    case 9: xpvpos = auxdisvarx; ypvpos =  auxdisvary + (sipadwidth/2.); break;
+	    case 10: xpvpos = auxdisvarx; ypvpos =  auxdisvary; break;
+	    case 11: xpvpos = auxdisvarx + (sipadwidth/2.); ypvpos =  auxdisvary + (sipadwidth/2.); break;
+	    case 12: xpvpos = auxdisvarx + (sipadwidth/2.); ypvpos =  auxdisvary; break;
+
+	    case 13: xpvpos = auxdisvarx; ypvpos =  - auxdisvary - (sipadwidth/2.); break;
+	    case 14: xpvpos = auxdisvarx; ypvpos =  - auxdisvary; break;
+	    case 15: xpvpos = auxdisvarx + (sipadwidth/2.); ypvpos =  - auxdisvary - (sipadwidth/2.); break;
+	    case 16: xpvpos = auxdisvarx + (sipadwidth/2.); ypvpos =  - auxdisvary; break;
+	    }
+	    
+	  }
+
+
 	  m_caloStruct[i].ele_vol[nEle*sectorNum+ie]= new G4PVPlacement(0, G4ThreeVector(xpvpos,ypvpos,zOffset+zOverburden+thick/2.), logi, baseName+"phys", m_logicWorld, false, 0);	
 	  std::cout << " positionning layer at " << xpvpos << " and zpos " << zOffset+zOverburden << std::endl;
 	  
 	  G4VisAttributes *simpleBoxVisAtt= new G4VisAttributes(m_caloStruct[i].g4Colour(ie));
 	  simpleBoxVisAtt->SetVisibility(true);
 	  logi->SetVisAttributes(simpleBoxVisAtt);
-	  //The z position of the Si pads must be the same
-	  if ( (eleName=="Si" && idx==4) || (eleName!="Si") ){
+	  //The z position of the Si pads and SKIROC must be the same
+	  if ( ( (eleName=="Si") && idx==4) || ( (eleName!="Si") && (eleName!="PVC") ) || (eleName=="PVC" && chip_index==16) ){
 	    zOverburden = zOverburden + thick;
 	  }
+	  //The z position of the SKIROC must be the same
+	  // if ( (eleName=="PVC" && chip_index==16) || (eleName!="PVC") ){
+	  //   zOverburden = zOverburden + thick;
+	  // }
 	  //for sensitive volumes
 	  //add region to be able to set specific cuts for it
 	  //just for Si
@@ -425,14 +472,18 @@ void DetectorConstruction::SetGapBetweenSensorPads(G4double gapx_, G4double gapy
   std::cout << " Setting the gap between sensor pads: Gap_x: " << gapx << " mm Gap_y: " << gapy << " mm" << std::endl;
 }
 
-G4CSGSolid *DetectorConstruction::constructSolid (std::string baseName, const G4double & width, G4double thick, bool sivol){
+G4CSGSolid *DetectorConstruction::constructSolid (std::string baseName, const G4double & width, const G4double & height, G4double thick, bool sivol, bool skiroc){
   
   G4CSGSolid *solid;
   if(sivol){
     //This is for the 2 by 2 Si pads
     solid = new G4Box(baseName+"box", width/4, width/4, thick/2 );
+  } else if (skiroc){
+    //SKIROC is not square is orthogonal
+    solid = new G4Box(baseName+"box", width/2, height/2, thick/2 );
   } else {
     solid = new G4Box(baseName+"box", width/2, width/2, thick/2 );
   }
+
   return solid;
 }
