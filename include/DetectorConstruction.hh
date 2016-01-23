@@ -28,30 +28,29 @@ public:
 
   enum DetectorVersion { 
     v_CALICE=0,
-    v_SiWECAL_1=1, // Absorber before: 0.0 Absorber inside 0.0 	Angle 0 
-    v_SiWECAL_2=2, // Absorber before: 4.2X0W  Absorber inside	0.0  	Angle 0
-    v_SiWECAL_3=3, // Absorber before: 8.4X0W  Absorber inside 	0.0 	Angle 0
-    v_SiWECAL_4=4, // Absorber before: 8.4X0W+200mmFe  Absorber inside 	0.0 	Angle 0
-    v_SiWECAL_5=5, // Absorber before: 8.4X0W+300mmFe  Absorber inside 	0.0 	Angle 0
-    v_SiWECAL_6=6, // Absorber before: 0.0   Absorber inside	4.2X0W between each plate 	Angle 0
-    v_SiWECAL_7=7, // Absorber before: 1.8X0W  Absorber inside 	4.2X0W between each plate 	Angle 0
-    v_SiWECAL_8=8, // Absorber before: 2.4X0W  Absorber inside 	4.2X0W between each plate 	Angle 0
-    v_SiWECAL_9=9, // Absorber before: 4.2X0W  Absorber inside 	4.2X0W between each plate 	Angle 0
-    v_SiWECAL_10=10, // Absorber before: 2.4X0W   Absorber inside	4.2X0W between each plate 	Angle 48
-    v_SiWECAL_11=11 // Absorber before: 0.0   Absorber inside	0.0 	Angle 90 
+    v_SiWECAL_B0X0_I0X0_A0=1, // Absorber before: 0.0 Absorber inside 0.0 	Angle 0 
+    v_SiWECAL_B42X0W_I0X0_A0=2, // Absorber before: 4.2X0W  Absorber inside	0.0  	Angle 0
+    v_SiWECAL_B84X0W_I0X0_A0=3, // Absorber before: 8.4X0W  Absorber inside 	0.0 	Angle 0
+    v_SiWECAL_B84X0W200Fe_I0X0_A0=4, // Absorber before: 8.4X0W+200mmFe  Absorber inside 	0.0 	Angle 0
+    v_SiWECAL_B84X0W300Fe_I0X0_A0=5, // Absorber before: 8.4X0W+300mmFe  Absorber inside 	0.0 	Angle 0
+    v_SiWECAL_B0X0_I42X0W_A0=6, // Absorber before: 0.0   Absorber inside	4.2X0W between each plate 	Angle 0
+    v_SiWECAL_B18X0W_I42X0W_A0=7, // Absorber before: 1.8X0W  Absorber inside 	4.2X0W between each plate 	Angle 0
+    v_SiWECAL_B24X0W_I42X0W_A0=8, // Absorber before: 2.4X0W  Absorber inside 	4.2X0W between each plate 	Angle 0
+    v_SiWECAL_B42X0W_I42X0W_A0=9, // Absorber before: 4.2X0W  Absorber inside 	4.2X0W between each plate 	Angle 0
+    v_SiWECAL_B24X0W_I42X0W_A48=10, // Absorber before: 2.4X0W   Absorber inside	4.2X0W between each plate 	Angle 48
+    v_SiWECAL_B0X0_I0X0_A90=11 // Absorber before: 0.0   Absorber inside	0.0 	Angle 90 
 
   };
 
   enum DetectorModel {
-    m_SiWECAL_0=0
+    m_SiWECAL=0
   };
 
   /**
      @short CTOR
    */
-  DetectorConstruction(G4int ver=DetectorConstruction::v_SiWECAL_1, 
-		       G4int mod=DetectorConstruction::m_SiWECAL_0,
-		       std::string absThickW="1.75,1.75,1.75,1.75,1.75,2.8,2.8,2.8,2.8,2.8,4.2,4.2,4.2,4.2,4.2");
+  DetectorConstruction(G4int ver=DetectorConstruction::v_SiWECAL_B42X0W_I0X0_A0, 
+		       G4int mod=DetectorConstruction::m_SiWECAL);
 
   /**
      @short calorimeter structure (sampling sections)
@@ -84,8 +83,6 @@ public:
    */
 
   void SetDetModel(G4int model);
-
-  void SetWThick(std::string thick);
 
   void SetGapBetweenSensorPads(G4double gapx_, G4double gapy_);
 

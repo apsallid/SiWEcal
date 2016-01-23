@@ -27,12 +27,9 @@
 using namespace std;
 
 //
-DetectorConstruction::DetectorConstruction(G4int ver, G4int mod,
-					   std::string absThickW
-					   ) 
+DetectorConstruction::DetectorConstruction(G4int ver, G4int mod) 
   : version_(ver), model_(mod), addPrePCB_(false)
 {
-  SetWThick(absThickW);
   SetGapBetweenSensorPads(0.1*mm,0.1*mm);
 
   //radiation lengths: cf. http://pdg.lbl.gov/2012/AtomicNuclearProperties/
@@ -59,12 +56,12 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod,
 	for(unsigned i=0; i<10; i++) m_caloStruct.push_back( SamplingSection(lThick,lEle) );
 	break;
       }
-    case v_SiWECAL_1:
+    case v_SiWECAL_B0X0_I0X0_A0:
       {
-	G4cout << "[DetectorConstruction] starting SiWECAL_1 0.0 X_0 with Tungsten)" << G4endl;
+	G4cout << "[DetectorConstruction] starting SiWECAL_B0X0_I0X0_A0 0.0 X_0 with Tungsten)" << G4endl;
 	std::vector<G4double> lThick;
 	std::vector<std::string> lEle;
-	lThick.push_back(0.330*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
 	lThick.push_back(1.6*mm);lEle.push_back("PCB");
 
 	unsigned nLay = 3;
@@ -73,9 +70,9 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod,
 	}
 	break;
       }
-    case v_SiWECAL_2:
+    case v_SiWECAL_B42X0W_I0X0_A0:
       {
-	G4cout << "[DetectorConstruction] starting SiWECAL_2 4.2 X_0 with Tungsten)" << G4endl;
+	G4cout << "[DetectorConstruction] starting SiWECAL_B42X0W_I0X0_A0 4.2 X_0 with Tungsten)" << G4endl;
 	std::vector<G4double> lThick;
 	std::vector<std::string> lEle;
 	lThick.push_back(4.2*3.504*mm);lEle.push_back("W");
@@ -443,20 +440,6 @@ void DetectorConstruction::SetDetModel(G4int model)
   if (model <= 0) return;
   std::cout << " -- Setting detector model to " << model << std::endl;
   model_ = model;
-}
-
-void DetectorConstruction::SetWThick(std::string thick)
-{
-  if (thick.size() <= 0) return;
-  std::cout << " -- Setting W thick to " << thick << std::endl;
-  std::vector<std::string> vec;
-  boost::split(vec, thick, boost::is_any_of(","));
-  absThickW_.resize(vec.size(),0);
-  for (unsigned iE(0); iE<vec.size(); ++iE){//loop on elements
-    std::istringstream(vec[iE])>>absThickW_[iE];
-    std::cout << absThickW_[iE] << " ";
-  }
-  std::cout << std::endl;
 }
 
 //Gap between the Si sensors of single layer (2x2)

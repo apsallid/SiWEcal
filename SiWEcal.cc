@@ -38,10 +38,8 @@ int main(int argc,char** argv)
   G4RunManager * runManager = new G4RunManager;
 
   // Set mandatory initialization classes
-  // int version=DetectorConstruction::v_CALICE;
-  // int model=DetectorConstruction::m_SIMPLE_20;
-  int version=DetectorConstruction::v_SiWECAL_2;
-  int model=DetectorConstruction::m_SiWECAL_0;
+  int version=DetectorConstruction::v_SiWECAL_B42X0W_I0X0_A0;
+  int model=DetectorConstruction::m_SiWECAL;
 
   double eta=0;
 
@@ -51,10 +49,7 @@ int main(int argc,char** argv)
 
   std::cout << "-- Running version " << version << " model " << model << std::endl;
 
-  std::string absThickW="1.75,1.75,1.75,1.75,1.75,2.8,2.8,2.8,2.8,2.8,4.2,4.2,4.2,4.2,4.2";
-  if(argc>5) absThickW = argv[5];
-
-  runManager->SetUserInitialization(new DetectorConstruction(version,model,absThickW));
+  runManager->SetUserInitialization(new DetectorConstruction(version,model));
   runManager->SetUserInitialization(new PhysicsList);
 
   // Set user action classes
