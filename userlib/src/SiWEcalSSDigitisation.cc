@@ -138,8 +138,8 @@ void SiWEcalSSDigitisation::Print(std::ostream & aOs) const{
       << " = Npixels total: " << nTotal_ << std::endl
       << " = sigmaPixel: " << sigmaPix_ << std::endl
     //<< " = sigmaNoise: ECAL " << noise_.find(DetectorEnum::ECAL)->second << ", FHCAL " << noise_.find(DetectorEnum::FHCAL)->second << ", BHCAL " << noise_.find(DetectorEnum::BHCAL)->second << std::endl
-      << " = MIPtoADC conversions: ECAL " << mipToADC_.find(DetectorEnum::FECAL)->second << ", FHCAL " << mipToADC_.find(DetectorEnum::FHCAL)->second << std::endl
-      << " = Time cut: ECAL " << timeCut_.find(DetectorEnum::FECAL)->second << ", FHCAL " << timeCut_.find(DetectorEnum::FHCAL)->second << ", BHCAL " << timeCut_.find(DetectorEnum::BHCAL1)->second << std::endl
-      << " = Intercalibration: ECAL " << gainSmearing_.find(DetectorEnum::FECAL)->second << ", FHCAL " << gainSmearing_.find(DetectorEnum::FHCAL)->second << ", BHCAL " << gainSmearing_.find(DetectorEnum::BHCAL1)->second << std::endl
+      << " = MIPtoADC conversions: SiWEcal " << mipToADC_.find(DetectorEnum::SiWEcal)->second << std::endl
+      << " = Time cut: SiWEcal " << timeCut_.find(DetectorEnum::SiWEcal)->second << std::endl
+      << " = Intercalibration: SiWEcal " << gainSmearing_.find(DetectorEnum::SiWEcal)->second << std::endl
       << "====================================" << std::endl;
 };

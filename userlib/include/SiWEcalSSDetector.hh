@@ -7,21 +7,14 @@
 #include "TH2D.h"
 
 enum DetectorEnum {
-  FECAL,
-  MECAL,
-  BECAL,
-  FHCAL,
-  BHCAL1,
-  BHCAL2,
-  v_SiWEcal_1,
-  v_SiWEcal_2
+  SiWEcal
 };
 
 class SiWEcalSSSubDetector {
 
 public:
   SiWEcalSSSubDetector():
-    type(DetectorEnum::v_SiWEcal_1),
+    type(DetectorEnum::SiWEcal),
     name(""),
     layerIdMin(0),
     layerIdMax(0),
@@ -63,121 +56,14 @@ public:
   inline void initialiseIndices(const unsigned versionNumber){
     
     indices_.clear();
-    indices_.resize(7,0);
+    indices_.resize(2,0);
     //fill layer indices
-    if (versionNumber==22){
-      indices_[4] = 0;
-      indices_[5] = 10;
-      indices_[6] = 10;
-    }
-    else if (versionNumber==28 || versionNumber==32) {
-      indices_[4] = 0;
-      indices_[5] = 12;
-      indices_[6] = 12;
-    }
-    else if (versionNumber==23) {
-      indices_[3] = 0;
-      indices_[4] = 38;
-      indices_[5] = 47;
-      indices_[6] = 54;
-    }
-    else if (versionNumber==21) {
-      indices_[3] = 0;
-      indices_[4] = 24;
-      indices_[5] = 34;
-      indices_[6] = 34;
-    }
-    else if (versionNumber==27 || versionNumber==31) {
-      indices_[3] = 0;
-      indices_[4] = 12;
-      indices_[5] = 24;
-      indices_[6] = 24;
-    }
-    else if (versionNumber==38) {
-      indices_[3] = 0;
-      indices_[4] = 11;
-      indices_[5] = 23;
-      indices_[6] = 23;
-    }
-    else if (versionNumber==39) {
-      indices_[3] = 0;
-      indices_[4] = 9;
-      indices_[5] = 21;
-      indices_[6] = 21;
-    }
-    else if (versionNumber < 20){
+    if (versionNumber==2){
       indices_[0] = 0;
-      indices_[1] = versionNumber==8?11:10;
-      indices_[2] = versionNumber==8?21:20;
-      indices_[3] = versionNumber==8?31:30;
-      indices_[4] = indices_[3];
-      indices_[5] = indices_[3];
-      indices_[6] = indices_[3];
+      indices_[1] = 12;
     }
-    else if (versionNumber == 30 || (versionNumber >= 100 && versionNumber < 104)){
-      indices_[0] = 0;
-      indices_[1] = 10;
-      indices_[2] = 20;
-      indices_[3] = 28;
-      indices_[4] = indices_[3];
-      indices_[5] = indices_[3];
-      indices_[6] = indices_[3];
-    }
-    else if (versionNumber == 33){
-      indices_[0] = 0;
-      indices_[1] = 10;
-      indices_[2] = 20;
-      indices_[3] = 28;
-      indices_[4] = 40;
-      indices_[5] = 52;
-      indices_[6] = 52;
-    }
-    else if (versionNumber == 34){
-      indices_[0] = 0;
-      indices_[1] = 8;
-      indices_[2] = 16;
-      indices_[3] = 24;
-      indices_[4] = indices_[3];
-      indices_[5] = indices_[3];
-      indices_[6] = indices_[3];
-    }
-    else if (versionNumber == 35){
-      indices_[0] = 0;
-      indices_[1] = 6;
-      indices_[2] = 12;
-      indices_[3] = 18;
-      indices_[4] = indices_[3];
-      indices_[5] = indices_[3];
-      indices_[6] = indices_[3];
-    }
-    else if (versionNumber == 36){
-      indices_[0] = 0;
-      indices_[1] = 8;
-      indices_[2] = 16;
-      indices_[3] = 24;
-      indices_[4] = 35;
-      indices_[5] = 47;
-      indices_[6] = 47;
-    }
-    else if (versionNumber == 37){
-      indices_[0] = 0;
-      indices_[1] = 6;
-      indices_[2] = 12;
-      indices_[3] = 18;
-      indices_[4] = 27;
-      indices_[5] = 39;
-      indices_[6] = 39;
-    }
-    else {
-      indices_[0] = 0;
-      indices_[1] = versionNumber==24?11:10;
-      indices_[2] = versionNumber==24?21:20;
-      indices_[3] = versionNumber==24?31:30;
-      indices_[4] = versionNumber==24?55:42;
-      indices_[5] = versionNumber==24?65:54;
-      indices_[6] = versionNumber==24?65:54;
-    }
-    
+
+
   };
 
   void buildDetector(const unsigned versionNumber,

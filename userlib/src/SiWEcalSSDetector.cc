@@ -17,107 +17,20 @@ void SiWEcalSSDetector::buildDetector(const unsigned versionNumber,
   bypassRadius_ = bypassR;
   reset();
   initialiseIndices(versionNumber);
-  SiWEcalSSSubDetector FECAL;
-  FECAL.type = DetectorEnum::FECAL;
-  FECAL.name = "FECAL";
-  FECAL.layerIdMin = indices_[0];
-  FECAL.layerIdMax = indices_[1];
-  FECAL.mipWeight = 1./0.0548;//mip for 200um si
-  FECAL.absWeight = 1.;//ratio of abs dedx
-  FECAL.gevWeight = 1.0;
-  FECAL.gevOffset = 0.0;
-  FECAL.isSi = true;
+  SiWEcalSSSubDetector SiWEcal;
+  SiWEcal.type = DetectorEnum::SiWEcal;
+  SiWEcal.name = "SiWEcal";
+  SiWEcal.layerIdMin = indices_[0];
+  SiWEcal.layerIdMax = indices_[1];
+  SiWEcal.mipWeight = 1./0.0600;//Fill the MIP here from study 
+  SiWEcal.absWeight = 1.;//ratio of abs dedx
+  SiWEcal.gevWeight = 1.0; //MIPToGeV 
+  SiWEcal.gevOffset = 0.0;
+  SiWEcal.isSi = true;
   //if (versionNumber>=30) 
-  if (!bypassRadius_) FECAL.radiusLim = 750;
-  else FECAL.radiusLim = 0;
-  if (FECAL.nLayers()>0) theDetector().addSubdetector(FECAL);
-  
-  SiWEcalSSSubDetector MECAL;
-  MECAL.type = DetectorEnum::MECAL;
-  MECAL.name = "MECAL";
-  MECAL.layerIdMin = indices_[1];
-  MECAL.layerIdMax = indices_[2];
-  MECAL.mipWeight = 1./0.0548;//mip for 200um si
-  MECAL.absWeight = 8.001/5.848;//ratio of abs dedx
-  MECAL.gevWeight = 1.0;
-  MECAL.gevOffset = 0.0;
-  MECAL.isSi = true;
-  //if (versionNumber>=30) 
-  if (!bypassRadius_) MECAL.radiusLim = 750;
-  else MECAL.radiusLim = 0;
-  if (MECAL.nLayers()>0) theDetector().addSubdetector(MECAL);
-  
-  SiWEcalSSSubDetector BECAL;
-  BECAL.type = DetectorEnum::BECAL;
-  BECAL.name = "BECAL";
-  BECAL.layerIdMin = indices_[2];
-  BECAL.layerIdMax = indices_[3];
-  BECAL.mipWeight = 1./0.0548;//mip for 200um si
-  BECAL.absWeight = 10.854/5.848;//ratio of abs dedx
-  BECAL.gevWeight = 1.0;
-  BECAL.gevOffset = 0.0;
-  BECAL.isSi = true;
-  //if (versionNumber>=30) 
-  if (!bypassRadius_) BECAL.radiusLim = 750;
-  else BECAL.radiusLim = 0;
-  if (BECAL.nLayers()>0) theDetector().addSubdetector(BECAL);
-  
-  SiWEcalSSSubDetector FHCAL;
-  FHCAL.type = DetectorEnum::FHCAL;
-  FHCAL.name = "FHCAL";
-  FHCAL.layerIdMin = indices_[3];
-  FHCAL.layerIdMax = indices_[4];
-  FHCAL.mipWeight = 1./0.0548;//mip for 200um si
-  FHCAL.absWeight = 65.235/5.848;//ratio of abs dedx
-  //if (!concept) FHCAL.absWeight = 0.5*65.235/5.848;
-  FHCAL.gevWeight = 1.;
-  FHCAL.gevOffset = 0.;
-  FHCAL.isSi = true;
-  //if (versionNumber>=30) 
-  if (!bypassRadius_) FHCAL.radiusLim = 600;
-  else FHCAL.radiusLim = 0;
-  if (isCaliceHcal) {
-    FHCAL.mipWeight = 1./0.816;
-    FHCAL.absWeight = 1.;
-    FHCAL.gevWeight = 1./39.32;//MIPtoGeV
-    FHCAL.gevOffset = -1.8/39.32;//offset in GeV
-    FHCAL.isScint = true;
-    FHCAL.isSi = false;
-  }
-  if (FHCAL.nLayers()>0) theDetector().addSubdetector(FHCAL);
-  
-  SiWEcalSSSubDetector BHCAL;
-  BHCAL.type = DetectorEnum::BHCAL1;
-  BHCAL.name = "BHCAL";
-  BHCAL.layerIdMin = indices_[4];
-  BHCAL.layerIdMax = indices_[5];
-  BHCAL.mipWeight = 1./0.63;//was 1.49 for 9mm scint
-  BHCAL.absWeight = 92.196/5.848;
-  BHCAL.gevWeight = 1.0;
-  BHCAL.gevOffset = 0.0;
-  BHCAL.isScint = true;
-  
-  if (isCaliceHcal) {
-    BHCAL.name = "BHCAL1";
-    BHCAL.mipWeight = FHCAL.mipWeight;
-    BHCAL.absWeight = 1.;
-    BHCAL.gevWeight = FHCAL.gevWeight;//MIPtoGeV
-    BHCAL.gevOffset = 0.0;
-  }
-  if (BHCAL.nLayers()>0) theDetector().addSubdetector(BHCAL);
-  
-  SiWEcalSSSubDetector BHCAL2;
-  BHCAL2.type = DetectorEnum::BHCAL2;
-  BHCAL2.name = "BHCAL2";
-  BHCAL2.layerIdMin = indices_[5];
-  BHCAL2.layerIdMax = indices_[6];
-  BHCAL2.mipWeight = FHCAL.mipWeight;
-  BHCAL2.absWeight = 104./21.;
-  BHCAL2.gevWeight = FHCAL.gevWeight;//MIPtoGeV
-  BHCAL2.gevOffset = 0.0;
-  BHCAL2.isScint = true;
-  
-  if (BHCAL2.nLayers()>0) theDetector().addSubdetector(BHCAL2);
+  if (!bypassRadius_) SiWEcal.radiusLim = 750;
+  else SiWEcal.radiusLim = 0;
+  if (SiWEcal.nLayers()>0) theDetector().addSubdetector(SiWEcal);
   
   finishInitialisation();
   

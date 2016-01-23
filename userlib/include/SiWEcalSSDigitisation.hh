@@ -26,30 +26,13 @@ public:
     //noise_[DetectorEnum::ECAL] = 0.12;
     //noise_[DetectorEnum::FHCAL] = 0.12;
     //noise_[DetectorEnum::BHCAL] = 0.12;
-    maxADC_[DetectorEnum::FECAL] = 65535; // 16-bit
-    maxADC_[DetectorEnum::MECAL] = 65535;
-    maxADC_[DetectorEnum::BECAL] = 65535;
-    maxADC_[DetectorEnum::FHCAL] = 65535;
-    maxADC_[DetectorEnum::BHCAL1] = 65535;
-    maxADC_[DetectorEnum::BHCAL2] = 65535;
-    mipToADC_[DetectorEnum::FECAL] = 10;//ADC per mips.
-    mipToADC_[DetectorEnum::MECAL] = 10;
-    mipToADC_[DetectorEnum::BECAL] = 10;
-    mipToADC_[DetectorEnum::FHCAL] = 10;
-    mipToADC_[DetectorEnum::BHCAL1] = 10;
-    mipToADC_[DetectorEnum::BHCAL2] = 10;
-    timeCut_[DetectorEnum::FECAL] = 25;//ns
-    timeCut_[DetectorEnum::MECAL] = 25;//ns
-    timeCut_[DetectorEnum::BECAL] = 25;//ns
-    timeCut_[DetectorEnum::FHCAL] = 25;//ns
-    timeCut_[DetectorEnum::BHCAL1] = 150;//ns
-    timeCut_[DetectorEnum::BHCAL2] = 150;//ns
-    gainSmearing_[DetectorEnum::FECAL] = 0.02;//2% intercalibration
-    gainSmearing_[DetectorEnum::MECAL] = 0.02;
-    gainSmearing_[DetectorEnum::BECAL] = 0.02;
-    gainSmearing_[DetectorEnum::FHCAL] = 0.02;
-    gainSmearing_[DetectorEnum::BHCAL1] = 0.02;
-    gainSmearing_[DetectorEnum::BHCAL2] = 0.02;
+    maxADC_[DetectorEnum::SiWEcal] = 65535; // 16-bit
+
+    mipToADC_[DetectorEnum::SiWEcal] = 10;//ADC per mips.
+
+    timeCut_[DetectorEnum::SiWEcal] = 25;//ns
+
+    gainSmearing_[DetectorEnum::SiWEcal] = 0.02;//2% intercalibration
 
     Print(std::cout);
 
@@ -58,12 +41,7 @@ public:
   ~SiWEcalSSDigitisation(){};
 
   inline void setIntercalibrationFactor(const unsigned icFactor){
-    gainSmearing_[DetectorEnum::FECAL] = icFactor/100.;
-    gainSmearing_[DetectorEnum::MECAL] = icFactor/100.;
-    gainSmearing_[DetectorEnum::BECAL] = icFactor/100.;
-    gainSmearing_[DetectorEnum::FHCAL] = icFactor/100.;
-    gainSmearing_[DetectorEnum::BHCAL1] = icFactor/100.;
-    gainSmearing_[DetectorEnum::BHCAL2] = icFactor/100.;
+    gainSmearing_[DetectorEnum::SiWEcal] = icFactor/100.;
   };
 
   inline void setRandomSeed(const unsigned aSeed){

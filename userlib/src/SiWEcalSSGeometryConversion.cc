@@ -6,7 +6,7 @@
 SiWEcalSSGeometryConversion::SiWEcalSSGeometryConversion(std::string filePath, const unsigned & model, const double & cellsize, const bool bypassR, const unsigned nSiLayers){
 
   dopatch_=false;
-  width_ = 200;//mm
+  width_ = 44;//mm
   model_ = model;
   if (model==1) width_ = 500;
   else if (model == 2) width_ = 1700*2;
@@ -47,9 +47,9 @@ unsigned SiWEcalSSGeometryConversion::getNumberOfSiLayers(const DetectorEnum typ
   if (model_ != 2) return nSiLayers_;
 
   double r1 = 1200;
-  if (type == DetectorEnum::FHCAL) {
-    r1 = 1000;
-  }
+  // if (type == DetectorEnum::FHCAL) {
+  //   r1 = 1000;
+  // }
   double r2 = theDetector().subDetectorByEnum(type).radiusLim;
   if (radius>r1) return 3;
   else if (radius>r2) return 2;
@@ -109,10 +109,11 @@ void SiWEcalSSGeometryConversion::setGranularity(const std::vector<unsigned> & g
 }
 
 double SiWEcalSSGeometryConversion::cellSize(const unsigned aLayer, const double aR) const{
-  if (theDetector().subDetectorByLayer(aLayer).isScint || model_ != 2) return cellSize_*granularity_[aLayer];
+  // if (theDetector().subDetectorByLayer(aLayer).isScint || model_ != 2) return cellSize_*granularity_[aLayer];
+  if (theDetector().subDetectorByLayer(aLayer).isScint) return cellSize_*granularity_[aLayer];
   double r1 = theDetector().subDetectorByLayer(aLayer).radiusLim;
-  if (aR<r1) return cellSize_*3;
-  else return cellSize_*4;
+  if (aR<r1) return cellSize_*1.; //3. 
+  else return cellSize_*1.; //4.
 }
 
 double SiWEcalSSGeometryConversion::cellSizeInCm(const unsigned aLayer, const double aR) const{
@@ -159,14 +160,14 @@ void SiWEcalSSGeometryConversion::fill(const DetectorEnum type,
   if (dopatch_ && model_==4){
     double xcrack1 = -160;
     double xcrack2 = 150;
-    if (type==DetectorEnum::MECAL){
-    xcrack1 += 310/3.;
-    xcrack2 += 310/3.;
-    }
-    else if (type == DetectorEnum::BECAL){
-      xcrack1 += 2*310/3.;
-      xcrack2 += 2*310/3.;
-    }
+    // if (type==DetectorEnum::MECAL){
+    // xcrack1 += 310/3.;
+    // xcrack2 += 310/3.;
+    // }
+    // else if (type == DetectorEnum::BECAL){
+    //   xcrack1 += 2*310/3.;
+    //   xcrack2 += 2*310/3.;
+    // }
 
     if ( fabs(posx-xcrack1)<5 || fabs(posx-xcrack2)<5 ) {
       //std::cout << " -- skipping hit " << posx << ", det " << type << " layer " << newlayer << " cracks at " << xcrack1 << " " << xcrack2 << std::endl;
@@ -290,32 +291,33 @@ void SiWEcalSSGeometryConversion::resetVector(std::vector<TH2D *> & aVec,
 	double max=1695;
 	double minx = min;
 	double maxx = max;
-	// if (getGranularity(iL,aDet) == 1) {
-	//   nBins = static_cast<unsigned>(width_*1./cellSize_);
-	//   min = -1.0*nBins*newcellsize/2.;
-	//   max = nBins*newcellsize/2.;
+	if (getGranularity(iL,aDet) == 1) {
+	  double newcellsize = cellSize_*getGranularity(iL,aDet);
+	  nBins = static_cast<unsigned>(width_*1./cellSize_);
+	  min = -1.0*nBins*newcellsize/2.;
+	  max = nBins*newcellsize/2.;
 	// }
 	// else {
-	if (aDet.isScint || bypassRadius_ || model_!=2){
-	  double newcellsize = cellSize_*getGranularity(iL,aDet);
-	  nBins = static_cast<unsigned>(width_*1./(newcellsize*2.))*2-2;
-	  min = -1.0*nBins*newcellsize/2.-newcellsize/2.;
-	  max = nBins*newcellsize/2.+newcellsize/2.;
-	  nBins+=1;
-	  minx = min;
-	  maxx = max;
+	// if (aDet.isScint || bypassRadius_ || model_!=2){
+	//   double newcellsize = cellSize_*getGranularity(iL,aDet);
+	//   nBins = static_cast<unsigned>(width_*1./(newcellsize*2.))*2-2;
+	//   min = -1.0*nBins*newcellsize/2.-newcellsize/2.;
+	//   max = nBins*newcellsize/2.+newcellsize/2.;
+	//   nBins+=1;
+	//   minx = min;
+	//   maxx = max;
 
-	  if (dopatch_ && model_==4){
-	    if (aDet.type == DetectorEnum::MECAL) {
-	      //set specific binning for displaced sections
-	      minx += 310/3.;
-	      maxx += 310/3.;
-	    }
-	    if (aDet.type == DetectorEnum::BECAL){
-	      minx += 2*310/3.;
-	      maxx += 2*310/3.;
-	    }
-	  }
+	  // if (dopatch_ && model_==4){
+	    // if (aDet.type == DetectorEnum::MECAL) {
+	    //   //set specific binning for displaced sections
+	    //   minx += 310/3.;
+	    //   maxx += 310/3.;
+	    // }
+	    // if (aDet.type == DetectorEnum::BECAL){
+	    //   minx += 2*310/3.;
+	    //   maxx += 2*310/3.;
+	    // }
+	  // }
 
 	}
 	aVec[iL] = new TH2D(lname.str().c_str(),";x(mm);y(mm)",nBins,minx,maxx,nBins,min,max);
