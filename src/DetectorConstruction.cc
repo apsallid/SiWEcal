@@ -75,8 +75,12 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	G4cout << "[DetectorConstruction] starting SiWECAL_B42X0W_I0X0_A0 4.2 X_0 with Tungsten)" << G4endl;
 	std::vector<G4double> lThick;
 	std::vector<std::string> lEle;
+	lThick.push_back(3.3*mm);lEle.push_back("Fe"); // This is for the front wall -- Check and correct 
+	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
 	lThick.push_back(4.2*3.504*mm);lEle.push_back("W");
-	//lThick.push_back();lEle.push_back("Plexiglass");
+	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
+	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	
 	//This is for the 16 SKIROC chips
 	unsigned nChips = 16;
 	for(unsigned i=0; i<nChips; i++) {
@@ -95,6 +99,13 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 
 	unsigned nLay = 3;
 	for(unsigned i=0; i<nLay; i++) {
+	  if(i!=0){
+	    //Front wall, gap, absorber, gap only in first layer
+	    lThick[0] = 0.0*mm; 
+	    lThick[1] = 0.0*mm; 
+	    lThick[2] = 0.0*mm; 
+	    lThick[3] = 0.0*mm; 
+	  }
 	  m_caloStruct.push_back( SamplingSection(lThick,lEle) );
 	}
 	break;
