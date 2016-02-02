@@ -58,21 +58,47 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
       }
     case v_SiWECAL_B0X0_I0X0_A0:
       {
-	G4cout << "[DetectorConstruction] starting SiWECAL_B0X0_I0X0_A0 0.0 X_0 with Tungsten)" << G4endl;
+	G4cout << "[DetectorConstruction] starting SiWECAL_B0X0W_I0X0_A0 0.0 X_0 with Tungsten" << G4endl;
 	std::vector<G4double> lThick;
 	std::vector<std::string> lEle;
+	lThick.push_back(3.3*mm);lEle.push_back("Fe"); // This is for the front wall -- Check and correct 
+	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
+	lThick.push_back(0.0*mm);lEle.push_back("W");
+	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
+	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	
+	//This is for the 16 SKIROC chips
+	unsigned nChips = 16;
+	for(unsigned i=0; i<nChips; i++) {
+	  lThick.push_back(1.1*mm);lEle.push_back("PVC"); // Will correct this to be the material of SKIROC
+	}
+	lThick.push_back(1.6*mm);lEle.push_back("PCB");	
+	lThick.push_back(0.2*mm);lEle.push_back("Air"); // this is for the glue dots
+	lThick.push_back(0.325*mm);lEle.push_back("Si"); // For visualization increase the thickness of Si Sensors by a factor of 5
 	lThick.push_back(0.325*mm);lEle.push_back("Si");
-	lThick.push_back(1.6*mm);lEle.push_back("PCB");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	//plastic plate here 
+	//kapton here
+        lThick.push_back(19.0*mm);lEle.push_back("Al");
+	lThick.push_back(23.0*mm);lEle.push_back("Air");
 
 	unsigned nLay = 3;
 	for(unsigned i=0; i<nLay; i++) {
+	  if(i!=0){
+	    //Front wall, gap, absorber, gap only in first layer
+	    lThick[0] = 0.0*mm; 
+	    lThick[1] = 0.0*mm; 
+	    lThick[2] = 0.0*mm; 
+	    lThick[3] = 0.0*mm; 
+	  }
 	  m_caloStruct.push_back( SamplingSection(lThick,lEle) );
 	}
 	break;
       }
     case v_SiWECAL_B42X0W_I0X0_A0:
       {
-	G4cout << "[DetectorConstruction] starting SiWECAL_B42X0W_I0X0_A0 4.2 X_0 with Tungsten)" << G4endl;
+	G4cout << "[DetectorConstruction] starting SiWECAL_B42X0W_I0X0_A0 4.2 X_0 with Tungsten" << G4endl;
 	std::vector<G4double> lThick;
 	std::vector<std::string> lEle;
 	lThick.push_back(3.3*mm);lEle.push_back("Fe"); // This is for the front wall -- Check and correct 
@@ -110,8 +136,367 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	}
 	break;
       }
+    case v_SiWECAL_B84X0W_I0X0_A0:
+      {
+	G4cout << "[DetectorConstruction] starting SiWECAL_B84X0W_I0X0_A0 8.4 X_0 with Tungsten" << G4endl;
+	std::vector<G4double> lThick;
+	std::vector<std::string> lEle;
+	lThick.push_back(3.3*mm);lEle.push_back("Fe"); // This is for the front wall -- Check and correct 
+	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
+	lThick.push_back(8.4*3.504*mm);lEle.push_back("W");
+	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
+	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	
+	//This is for the 16 SKIROC chips
+	unsigned nChips = 16;
+	for(unsigned i=0; i<nChips; i++) {
+	  lThick.push_back(1.1*mm);lEle.push_back("PVC"); // Will correct this to be the material of SKIROC
+	}
+	lThick.push_back(1.6*mm);lEle.push_back("PCB");	
+	lThick.push_back(0.2*mm);lEle.push_back("Air"); // this is for the glue dots
+	lThick.push_back(0.325*mm);lEle.push_back("Si"); // For visualization increase the thickness of Si Sensors by a factor of 5
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	//plastic plate here 
+	//kapton here
+        lThick.push_back(19.0*mm);lEle.push_back("Al");
+	lThick.push_back(23.0*mm);lEle.push_back("Air");
 
+	unsigned nLay = 3;
+	for(unsigned i=0; i<nLay; i++) {
+	  if(i!=0){
+	    //Front wall, gap, absorber, gap only in first layer
+	    lThick[0] = 0.0*mm; 
+	    lThick[1] = 0.0*mm; 
+	    lThick[2] = 0.0*mm; 
+	    lThick[3] = 0.0*mm; 
+	  }
+	  m_caloStruct.push_back( SamplingSection(lThick,lEle) );
+	}
+	break;
+      }
+    case v_SiWECAL_B84X0W200Fe_I0X0_A0:
+      {
+	G4cout << "[DetectorConstruction] starting SiWECAL_B84X0W200Fe_I0X0_A0 8.4 X_0 with Tungsten and 200 mm of Fe" << G4endl;
+	std::vector<G4double> lThick;
+	std::vector<std::string> lEle;
+	lThick.push_back(3.3*mm);lEle.push_back("Fe"); // This is for the front wall -- Check and correct 
+	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
+	lThick.push_back(8.4*3.504*mm);lEle.push_back("W");
+	lThick.push_back(200.0*mm);lEle.push_back("Fe");
+	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
+	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	
+	//This is for the 16 SKIROC chips
+	unsigned nChips = 16;
+	for(unsigned i=0; i<nChips; i++) {
+	  lThick.push_back(1.1*mm);lEle.push_back("PVC"); // Will correct this to be the material of SKIROC
+	}
+	lThick.push_back(1.6*mm);lEle.push_back("PCB");	
+	lThick.push_back(0.2*mm);lEle.push_back("Air"); // this is for the glue dots
+	lThick.push_back(0.325*mm);lEle.push_back("Si"); // For visualization increase the thickness of Si Sensors by a factor of 5
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	//plastic plate here 
+	//kapton here
+        lThick.push_back(19.0*mm);lEle.push_back("Al");
+	lThick.push_back(23.0*mm);lEle.push_back("Air");
 
+	unsigned nLay = 3;
+	for(unsigned i=0; i<nLay; i++) {
+	  if(i!=0){
+	    //Front wall, gap, absorber, gap only in first layer
+	    lThick[0] = 0.0*mm; 
+	    lThick[1] = 0.0*mm; 
+	    lThick[2] = 0.0*mm; 
+	    lThick[3] = 0.0*mm; 
+	    lThick[4] = 0.0*mm; 
+	  }
+	  m_caloStruct.push_back( SamplingSection(lThick,lEle) );
+	}
+	break;
+      }
+    case v_SiWECAL_B84X0W300Fe_I0X0_A0:
+      {
+	G4cout << "[DetectorConstruction] starting SiWECAL_B84X0W300Fe_I0X0_A0 8.4 X_0 with Tungsten and 300 mm of Fe" << G4endl;
+	std::vector<G4double> lThick;
+	std::vector<std::string> lEle;
+	lThick.push_back(3.3*mm);lEle.push_back("Fe"); // This is for the front wall -- Check and correct 
+	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
+	lThick.push_back(8.4*3.504*mm);lEle.push_back("W");
+	lThick.push_back(300.0*mm);lEle.push_back("Fe");
+	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
+	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	
+	//This is for the 16 SKIROC chips
+	unsigned nChips = 16;
+	for(unsigned i=0; i<nChips; i++) {
+	  lThick.push_back(1.1*mm);lEle.push_back("PVC"); // Will correct this to be the material of SKIROC
+	}
+	lThick.push_back(1.6*mm);lEle.push_back("PCB");	
+	lThick.push_back(0.2*mm);lEle.push_back("Air"); // this is for the glue dots
+	lThick.push_back(0.325*mm);lEle.push_back("Si"); // For visualization increase the thickness of Si Sensors by a factor of 5
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	//plastic plate here 
+	//kapton here
+        lThick.push_back(19.0*mm);lEle.push_back("Al");
+	lThick.push_back(23.0*mm);lEle.push_back("Air");
+
+	unsigned nLay = 3;
+	for(unsigned i=0; i<nLay; i++) {
+	  if(i!=0){
+	    //Front wall, gap, absorber, gap only in first layer
+	    lThick[0] = 0.0*mm; 
+	    lThick[1] = 0.0*mm; 
+	    lThick[2] = 0.0*mm; 
+	    lThick[3] = 0.0*mm; 
+	    lThick[4] = 0.0*mm; 
+	  }
+	  m_caloStruct.push_back( SamplingSection(lThick,lEle) );
+	}
+	break;
+      }
+    case v_SiWECAL_B0X0_I42X0W_A0:
+      {
+	G4cout << "[DetectorConstruction] starting SiWECAL_B0X0W_I42X0_A0 4.2 X_0 with Tungsten between each plate" << G4endl;
+	std::vector<G4double> lThick;
+	std::vector<std::string> lEle;
+	lThick.push_back(3.3*mm);lEle.push_back("Fe"); // This is for the front wall -- Check and correct 
+	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
+	lThick.push_back(0.0*mm);lEle.push_back("W");
+	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
+	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	
+	//This is for the 16 SKIROC chips
+	unsigned nChips = 16;
+	for(unsigned i=0; i<nChips; i++) {
+	  lThick.push_back(1.1*mm);lEle.push_back("PVC"); // Will correct this to be the material of SKIROC
+	}
+	lThick.push_back(1.6*mm);lEle.push_back("PCB");	
+	lThick.push_back(0.2*mm);lEle.push_back("Air"); // this is for the glue dots
+	lThick.push_back(0.325*mm);lEle.push_back("Si"); // For visualization increase the thickness of Si Sensors by a factor of 5
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	//plastic plate here 
+	//kapton here
+        lThick.push_back(19.0*mm);lEle.push_back("Al");
+	lThick.push_back(15.0*mm);lEle.push_back("Air");
+
+	unsigned nLay = 3;
+	for(unsigned i=0; i<nLay; i++) {
+	  if(i!=0){
+	    //Front wall, gap, absorber, gap only in first layer
+	    lThick[0] = 0.0*mm; 
+	    lThick[1] = 0.0*mm; 
+	    lThick[2] = 4.2*3.504*mm; // absorber between plates 
+	  }
+	  m_caloStruct.push_back( SamplingSection(lThick,lEle) );
+	}
+	break;
+      }
+    case v_SiWECAL_B18X0W_I42X0W_A0:
+      {
+	G4cout << "[DetectorConstruction] starting SiWECAL_B18X0W_I42X0_A0 1.8 X_0 and 4.2 X_0 with Tungsten before and between each plate" << G4endl;
+	std::vector<G4double> lThick;
+	std::vector<std::string> lEle;
+	lThick.push_back(3.3*mm);lEle.push_back("Fe"); // This is for the front wall -- Check and correct 
+	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
+	lThick.push_back(1.8*3.504*mm);lEle.push_back("W");
+	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
+	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	
+	//This is for the 16 SKIROC chips
+	unsigned nChips = 16;
+	for(unsigned i=0; i<nChips; i++) {
+	  lThick.push_back(1.1*mm);lEle.push_back("PVC"); // Will correct this to be the material of SKIROC
+	}
+	lThick.push_back(1.6*mm);lEle.push_back("PCB");	
+	lThick.push_back(0.2*mm);lEle.push_back("Air"); // this is for the glue dots
+	lThick.push_back(0.325*mm);lEle.push_back("Si"); // For visualization increase the thickness of Si Sensors by a factor of 5
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	//plastic plate here 
+	//kapton here
+        lThick.push_back(19.0*mm);lEle.push_back("Al");
+	lThick.push_back(15.0*mm);lEle.push_back("Air");
+
+	unsigned nLay = 3;
+	for(unsigned i=0; i<nLay; i++) {
+	  if(i!=0){
+	    //Front wall, gap, absorber, gap only in first layer
+	    lThick[0] = 0.0*mm; 
+	    lThick[1] = 0.0*mm; 
+	    lThick[2] = 4.2*3.504*mm; // absorber between plates 
+	  }
+	  m_caloStruct.push_back( SamplingSection(lThick,lEle) );
+	}
+	break;
+      }
+    case v_SiWECAL_B24X0W_I42X0W_A0:
+      {
+	G4cout << "[DetectorConstruction] starting SiWECAL_B24X0W_I42X0_A0 2.4 X_0 and 4.2 X_0 with Tungsten before and between each plate" << G4endl;
+	std::vector<G4double> lThick;
+	std::vector<std::string> lEle;
+	lThick.push_back(3.3*mm);lEle.push_back("Fe"); // This is for the front wall -- Check and correct 
+	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
+	lThick.push_back(2.4*3.504*mm);lEle.push_back("W");
+	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
+	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	
+	//This is for the 16 SKIROC chips
+	unsigned nChips = 16;
+	for(unsigned i=0; i<nChips; i++) {
+	  lThick.push_back(1.1*mm);lEle.push_back("PVC"); // Will correct this to be the material of SKIROC
+	}
+	lThick.push_back(1.6*mm);lEle.push_back("PCB");	
+	lThick.push_back(0.2*mm);lEle.push_back("Air"); // this is for the glue dots
+	lThick.push_back(0.325*mm);lEle.push_back("Si"); // For visualization increase the thickness of Si Sensors by a factor of 5
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	//plastic plate here 
+	//kapton here
+        lThick.push_back(19.0*mm);lEle.push_back("Al");
+	lThick.push_back(15.0*mm);lEle.push_back("Air");
+
+	unsigned nLay = 3;
+	for(unsigned i=0; i<nLay; i++) {
+	  if(i!=0){
+	    //Front wall, gap, absorber, gap only in first layer
+	    lThick[0] = 0.0*mm; 
+	    lThick[1] = 0.0*mm; 
+	    lThick[2] = 4.2*3.504*mm; // absorber between plates 
+	  }
+	  m_caloStruct.push_back( SamplingSection(lThick,lEle) );
+	}
+	break;
+      }
+    case v_SiWECAL_B42X0W_I42X0W_A0:
+      {
+	G4cout << "[DetectorConstruction] starting SiWECAL_B42X0W_I42X0_A0 4.2 X_0 and 4.2 X_0 with Tungsten before and between each plate" << G4endl;
+	std::vector<G4double> lThick;
+	std::vector<std::string> lEle;
+	lThick.push_back(3.3*mm);lEle.push_back("Fe"); // This is for the front wall -- Check and correct 
+	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
+	lThick.push_back(4.2*3.504*mm);lEle.push_back("W");
+	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
+	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	
+	//This is for the 16 SKIROC chips
+	unsigned nChips = 16;
+	for(unsigned i=0; i<nChips; i++) {
+	  lThick.push_back(1.1*mm);lEle.push_back("PVC"); // Will correct this to be the material of SKIROC
+	}
+	lThick.push_back(1.6*mm);lEle.push_back("PCB");	
+	lThick.push_back(0.2*mm);lEle.push_back("Air"); // this is for the glue dots
+	lThick.push_back(0.325*mm);lEle.push_back("Si"); // For visualization increase the thickness of Si Sensors by a factor of 5
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	//plastic plate here 
+	//kapton here
+        lThick.push_back(19.0*mm);lEle.push_back("Al");
+	lThick.push_back(15.0*mm);lEle.push_back("Air");
+
+	unsigned nLay = 3;
+	for(unsigned i=0; i<nLay; i++) {
+	  if(i!=0){
+	    //Front wall, gap, absorber, gap only in first layer
+	    lThick[0] = 0.0*mm; 
+	    lThick[1] = 0.0*mm; 
+	    lThick[2] = 4.2*3.504*mm; // absorber between plates 
+	  }
+	  m_caloStruct.push_back( SamplingSection(lThick,lEle) );
+	}
+	break;
+      }
+    case v_SiWECAL_B24X0W_I42X0W_A48:
+      {
+	G4cout << "[DetectorConstruction] starting SiWECAL_B24X0W_I42X0_A0 2.4 X_0 and 4.2 X_0 with Tungsten before and between each plate and 48 degree angle" << G4endl;
+	std::vector<G4double> lThick;
+	std::vector<std::string> lEle;
+	lThick.push_back(3.3*mm);lEle.push_back("Fe"); // This is for the front wall -- Check and correct 
+	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
+	lThick.push_back(2.4*3.504*mm);lEle.push_back("W");
+	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
+	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	
+	//This is for the 16 SKIROC chips
+	unsigned nChips = 16;
+	for(unsigned i=0; i<nChips; i++) {
+	  lThick.push_back(1.1*mm);lEle.push_back("PVC"); // Will correct this to be the material of SKIROC
+	}
+	lThick.push_back(1.6*mm);lEle.push_back("PCB");	
+	lThick.push_back(0.2*mm);lEle.push_back("Air"); // this is for the glue dots
+	lThick.push_back(0.325*mm);lEle.push_back("Si"); // For visualization increase the thickness of Si Sensors by a factor of 5
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	//plastic plate here 
+	//kapton here
+        lThick.push_back(19.0*mm);lEle.push_back("Al");
+	lThick.push_back(15.0*mm);lEle.push_back("Air");
+
+	unsigned nLay = 3;
+	for(unsigned i=0; i<nLay; i++) {
+	  if(i!=0){
+	    //Front wall, gap, absorber, gap only in first layer
+	    lThick[0] = 0.0*mm; 
+	    lThick[1] = 0.0*mm; 
+	    lThick[2] = 4.2*3.504*mm; // absorber between plates 
+	  }
+	  m_caloStruct.push_back( SamplingSection(lThick,lEle) );
+	}
+	break;
+      }
+    case v_SiWECAL_B0X0_I0X0_A90:
+      {
+	G4cout << "[DetectorConstruction] starting SiWECAL_B0X0W_I0X0_A0 0.0 X_0 with Tungsten with 90 degree angle" << G4endl;
+	std::vector<G4double> lThick;
+	std::vector<std::string> lEle;
+	lThick.push_back(3.3*mm);lEle.push_back("Fe"); // This is for the front wall -- Check and correct 
+	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
+	lThick.push_back(0.0*mm);lEle.push_back("W");
+	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
+	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	
+	//This is for the 16 SKIROC chips
+	unsigned nChips = 16;
+	for(unsigned i=0; i<nChips; i++) {
+	  lThick.push_back(1.1*mm);lEle.push_back("PVC"); // Will correct this to be the material of SKIROC
+	}
+	lThick.push_back(1.6*mm);lEle.push_back("PCB");	
+	lThick.push_back(0.2*mm);lEle.push_back("Air"); // this is for the glue dots
+	lThick.push_back(0.325*mm);lEle.push_back("Si"); // For visualization increase the thickness of Si Sensors by a factor of 5
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	//plastic plate here 
+	//kapton here
+        lThick.push_back(19.0*mm);lEle.push_back("Al");
+	lThick.push_back(23.0*mm);lEle.push_back("Air");
+
+	unsigned nLay = 3;
+	for(unsigned i=0; i<nLay; i++) {
+	  if(i!=0){
+	    //Front wall, gap, absorber, gap only in first layer
+	    lThick[0] = 0.0*mm; 
+	    lThick[1] = 0.0*mm; 
+	    lThick[2] = 0.0*mm; 
+	    lThick[3] = 0.0*mm; 
+	  }
+	  m_caloStruct.push_back( SamplingSection(lThick,lEle) );
+	}
+	break;
+      }
+
+      
     }
 
   DefineMaterials();
