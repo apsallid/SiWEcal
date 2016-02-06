@@ -65,7 +65,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
 	lThick.push_back(0.0*mm);lEle.push_back("W");
 	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
-	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	lThick.push_back(18.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
 	
 	//This is for the 16 SKIROC chips
 	unsigned nChips = 16;
@@ -80,7 +80,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(0.325*mm);lEle.push_back("Si");
 	//plastic plate here 
 	//kapton here
-        lThick.push_back(19.0*mm);lEle.push_back("Al");
+        lThick.push_back(25.0*mm);lEle.push_back("Al");
 	lThick.push_back(23.0*mm);lEle.push_back("Air");
 
 	unsigned nLay = 3;
@@ -105,7 +105,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
 	lThick.push_back(4.2*3.504*mm);lEle.push_back("W");
 	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
-	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	lThick.push_back(18.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
 	
 	//This is for the 16 SKIROC chips
 	unsigned nChips = 16;
@@ -120,7 +120,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(0.325*mm);lEle.push_back("Si");
 	//plastic plate here 
 	//kapton here
-        lThick.push_back(19.0*mm);lEle.push_back("Al");
+        lThick.push_back(25.0*mm);lEle.push_back("Al");
 	lThick.push_back(23.0*mm);lEle.push_back("Air");
 
 	unsigned nLay = 3;
@@ -145,7 +145,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
 	lThick.push_back(8.4*3.504*mm);lEle.push_back("W");
 	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
-	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	lThick.push_back(18.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
 	
 	//This is for the 16 SKIROC chips
 	unsigned nChips = 16;
@@ -160,7 +160,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(0.325*mm);lEle.push_back("Si");
 	//plastic plate here 
 	//kapton here
-        lThick.push_back(19.0*mm);lEle.push_back("Al");
+        lThick.push_back(25.0*mm);lEle.push_back("Al");
 	lThick.push_back(23.0*mm);lEle.push_back("Air");
 
 	unsigned nLay = 3;
@@ -186,7 +186,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(8.4*3.504*mm);lEle.push_back("W");
 	lThick.push_back(200.0*mm);lEle.push_back("Fe");
 	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
-	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	lThick.push_back(18.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
 	
 	//This is for the 16 SKIROC chips
 	unsigned nChips = 16;
@@ -201,7 +201,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(0.325*mm);lEle.push_back("Si");
 	//plastic plate here 
 	//kapton here
-        lThick.push_back(19.0*mm);lEle.push_back("Al");
+        lThick.push_back(25.0*mm);lEle.push_back("Al");
 	lThick.push_back(23.0*mm);lEle.push_back("Air");
 
 	unsigned nLay = 3;
@@ -228,7 +228,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(8.4*3.504*mm);lEle.push_back("W");
 	lThick.push_back(300.0*mm);lEle.push_back("Fe");
 	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
-	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	lThick.push_back(18.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
 	
 	//This is for the 16 SKIROC chips
 	unsigned nChips = 16;
@@ -243,7 +243,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(0.325*mm);lEle.push_back("Si");
 	//plastic plate here 
 	//kapton here
-        lThick.push_back(19.0*mm);lEle.push_back("Al");
+        lThick.push_back(25.0*mm);lEle.push_back("Al");
 	lThick.push_back(23.0*mm);lEle.push_back("Air");
 
 	unsigned nLay = 3;
@@ -269,7 +269,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
 	lThick.push_back(0.0*mm);lEle.push_back("W");
 	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
-	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	lThick.push_back(18.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
 	
 	//This is for the 16 SKIROC chips
 	unsigned nChips = 16;
@@ -284,7 +284,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(0.325*mm);lEle.push_back("Si");
 	//plastic plate here 
 	//kapton here
-        lThick.push_back(19.0*mm);lEle.push_back("Al");
+        lThick.push_back(25.0*mm);lEle.push_back("Al");
 	lThick.push_back(15.0*mm);lEle.push_back("Air");
 
 	unsigned nLay = 3;
@@ -308,7 +308,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
 	lThick.push_back(1.8*3.504*mm);lEle.push_back("W");
 	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
-	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	lThick.push_back(18.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
 	
 	//This is for the 16 SKIROC chips
 	unsigned nChips = 16;
@@ -323,7 +323,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(0.325*mm);lEle.push_back("Si");
 	//plastic plate here 
 	//kapton here
-        lThick.push_back(19.0*mm);lEle.push_back("Al");
+        lThick.push_back(25.0*mm);lEle.push_back("Al");
 	lThick.push_back(15.0*mm);lEle.push_back("Air");
 
 	unsigned nLay = 3;
@@ -347,7 +347,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
 	lThick.push_back(2.4*3.504*mm);lEle.push_back("W");
 	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
-	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	lThick.push_back(18.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
 	
 	//This is for the 16 SKIROC chips
 	unsigned nChips = 16;
@@ -362,7 +362,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(0.325*mm);lEle.push_back("Si");
 	//plastic plate here 
 	//kapton here
-        lThick.push_back(19.0*mm);lEle.push_back("Al");
+        lThick.push_back(25.0*mm);lEle.push_back("Al");
 	lThick.push_back(15.0*mm);lEle.push_back("Air");
 
 	unsigned nLay = 3;
@@ -386,7 +386,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
 	lThick.push_back(4.2*3.504*mm);lEle.push_back("W");
 	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
-	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	lThick.push_back(18.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
 	
 	//This is for the 16 SKIROC chips
 	unsigned nChips = 16;
@@ -401,7 +401,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(0.325*mm);lEle.push_back("Si");
 	//plastic plate here 
 	//kapton here
-        lThick.push_back(19.0*mm);lEle.push_back("Al");
+        lThick.push_back(25.0*mm);lEle.push_back("Al");
 	lThick.push_back(15.0*mm);lEle.push_back("Air");
 
 	unsigned nLay = 3;
@@ -425,7 +425,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
 	lThick.push_back(2.4*3.504*mm);lEle.push_back("W");
 	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
-	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	lThick.push_back(18.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
 	
 	//This is for the 16 SKIROC chips
 	unsigned nChips = 16;
@@ -440,7 +440,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(0.325*mm);lEle.push_back("Si");
 	//plastic plate here 
 	//kapton here
-        lThick.push_back(19.0*mm);lEle.push_back("Al");
+        lThick.push_back(25.0*mm);lEle.push_back("Al");
 	lThick.push_back(15.0*mm);lEle.push_back("Air");
 
 	unsigned nLay = 3;
@@ -464,7 +464,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
 	lThick.push_back(0.0*mm);lEle.push_back("W");
 	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
-	lThick.push_back(15.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	lThick.push_back(18.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
 	
 	//This is for the 16 SKIROC chips
 	unsigned nChips = 16;
@@ -479,7 +479,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(0.325*mm);lEle.push_back("Si");
 	//plastic plate here 
 	//kapton here
-        lThick.push_back(19.0*mm);lEle.push_back("Al");
+        lThick.push_back(25.0*mm);lEle.push_back("Al");
 	lThick.push_back(23.0*mm);lEle.push_back("Air");
 
 	unsigned nLay = 3;
@@ -719,8 +719,8 @@ void DetectorConstruction::buildStack(const unsigned sectorNum)
 	std::string baseName(nameBuf);
 	G4double thick = m_caloStruct[i].ele_thick[ie];
 	G4double width = 88.0*mm; //Hardcoded should fix these
-	G4double height = 8.5*mm; //For SKIROC
-	if (skirocvol){width = 7.1*mm;}
+	G4double height = 17.0*mm; //For SKIROC
+	if (skirocvol){width = 17.0*mm;}
 
 	if(thick>0){
 	  solid = constructSolid(baseName,width,height,thick,sivol,skirocvol);
@@ -858,7 +858,7 @@ G4CSGSolid *DetectorConstruction::constructSolid (std::string baseName, const G4
     //This is for the 2 by 2 Si pads
     solid = new G4Box(baseName+"box", width/4, width/4, thick/2 );
   } else if (skiroc){
-    //SKIROC is not square is orthogonal
+    //SKIROC is not square is orthogonal?
     solid = new G4Box(baseName+"box", width/2, height/2, thick/2 );
   } else {
     solid = new G4Box(baseName+"box", width/2, width/2, thick/2 );
