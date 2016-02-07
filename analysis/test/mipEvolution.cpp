@@ -66,7 +66,7 @@ int main(){//main
   TFile* files[numberoffiles];
   for (int k=0; k<numberoffiles; k++){
     // files[k]= new TFile(filename[k]);
-    files[k] = TFile::Open("/afs/cern.ch/work/a/apsallid/CMS/Geant4/SiWEcal/Parallel/"+filename[k]+".root");
+    files[k] = TFile::Open("/afs/cern.ch/work/a/apsallid/CMS/Geant4/SiWEcal/Parallel/testingfile/"+filename[k]+".root");
     lTree[k] = (TTree*) files[k]->Get("SiWEcalSSTree");
     if (!lTree[k]){
       std::cout << " -- Error, tree cannot be opened. Exiting..." << std::endl;
@@ -169,7 +169,7 @@ int main(){//main
   TGraphErrors *grMPV[numberoffiles];
   TString mpvname[numberoffiles];
   
-  TGraphErrors *grSigma[numberoffiles];
+  // TGraphErrors *grSigma[numberoffiles];
   TString sigmaname[numberoffiles];
 
   //For the mpv and sigma plot 
@@ -180,10 +180,10 @@ int main(){//main
   std::vector<double> padd;
   padd.push_back(1.);padd.push_back(2.);padd.push_back(3.);padd.push_back(4.);padd.push_back(5.);padd.push_back(6.);
   padd.push_back(7.);padd.push_back(8.);padd.push_back(9.);padd.push_back(10.);padd.push_back(11.);padd.push_back(12.);
-  std::vector<double>  mpv;
+  std::vector<Double_t>  mpv;
   std::vector<double>  thesigma;
   std::vector<double>  padr;
-  std::vector<double>  mpvr;
+  std::vector<Double_t>  mpvr;
   std::vector<double>  thesigmaerr;
 
   //The TH2F to save the histos with mpv and sigma for the different energies
@@ -249,12 +249,12 @@ int main(){//main
       sigmahistos[i]->Fill( k , fit->GetParameter(2) * 1000.);
       // sigmahistos[i]->SetBinError( (k+1) , fit->GetParError(2) );
 
-      mpv.push_back(mpc);
-      mpvr.push_back(fit->GetParError(1));
+      mpv.push_back(mpc * 1000.);
+      mpvr.push_back(fit->GetParError(1) * 1000.);
       padr.push_back(0.);
 
-      thesigma.push_back(fit->GetParameter(2));
-      thesigmaerr.push_back(fit->GetParError(2));
+      thesigma.push_back(fit->GetParameter(2) * 1000.);
+      thesigmaerr.push_back(fit->GetParError(2) * 1000.);
 
       
       // if(i==0) {mpvname = "grMPV_50GeV"; sigmaname = "grSigma_50GeV";}
@@ -271,8 +271,8 @@ int main(){//main
     }// end of loop over histos  
 
      //For the multi plot
-    grMPV[i] = new TGraphErrors(mpv.size(),&padd[0],&mpv[0],&mpvr[0],&padr[0]);
-    grSigma[i] = new TGraphErrors(thesigma.size(),&padd[0],&thesigma[0],&thesigmaerr[0],&padr[0]);
+    grMPV[i] = new TGraphErrors(mpv.size(),&padd[0],&mpv[0],&padr[0],&mpvr[0]);
+    // grSigma[i] = new TGraphErrors(thesigma.size(),&padd[0],&thesigma[0],&thesigmaerr[0],&padr[0]);
     
     mpv.clear();
     mpvr.clear();
@@ -303,9 +303,9 @@ int main(){//main
 
   //======================================================================================
   //For the multi mpv plot
-  TCanvas *c1 = new TCanvas("c1","mpv",200,10,1200,968); 
+  TCanvas *c1 = new TCanvas("c1","mpv",200,10,1200,1200); 
   // TGraphErrors *grMPV[0] = new TGraphErrors(mpv.size(),&padd[0],&mpv[0],&mpvr[0],&padr[0]);
-
+  gStyle->SetStripDecimals(false);  
   //Change the bin labels
   grMPV[0]->GetXaxis()->SetBinLabel( grMPV[0]->GetXaxis()->FindBin(1.0) , pad[0]); 
   grMPV[0]->GetXaxis()->SetBinLabel( grMPV[0]->GetXaxis()->FindBin(2.0) , pad[1]); 
@@ -321,7 +321,7 @@ int main(){//main
   grMPV[0]->GetXaxis()->SetBinLabel( grMPV[0]->GetXaxis()->FindBin(12.0) , pad[11]); 
   grMPV[0]->GetXaxis()->SetTitleOffset(2.0);
   grMPV[0]->GetYaxis()->SetTitleOffset(1.5);
-  grMPV[0]->GetXaxis()->SetLabelSize(0.02);
+  grMPV[0]->GetXaxis()->SetLabelSize(0.04);
   
   grMPV[0]->SetMarkerStyle(20); 
   grMPV[0]->SetMarkerSize(1.2); 
@@ -330,7 +330,7 @@ int main(){//main
   grMPV[0]->Draw("APL");
   c1->Update();
     
-  for (int k=1; k<numberoffiles; k++){
+  for (int k=1; k<numberoffiles-2; k++){
     grMPV[k]->SetMarkerStyle(20+k);
     grMPV[k]->SetMarkerSize(1.2); 
     grMPV[k]->SetMarkerColor(1+k);
@@ -350,8 +350,8 @@ int main(){//main
   leg->AddEntry(grMPV[6],"SiWECAL_B18X0W_I42X0W_A0","LP");  
   leg->AddEntry(grMPV[7],"SiWECAL_B24X0W_I42X0W_A0","LP");  
   leg->AddEntry(grMPV[8],"SiWECAL_B42X0W_I42X0W_A0","LP");  
-  leg->AddEntry(grMPV[9],"SiWECAL_B24X0W_I42X0W_A48","LP");  
-  leg->AddEntry(grMPV[10],"SiWECAL_B0X0_I0X0_A90","LP");  
+  // leg->AddEntry(grMPV[9],"SiWECAL_B24X0W_I42X0W_A48","LP");  
+  // leg->AddEntry(grMPV[10],"SiWECAL_B0X0_I0X0_A90","LP");  
   leg->SetFillColor(18);
   leg->SetHeader(" Detector Configurations ");
                                             
@@ -361,7 +361,7 @@ int main(){//main
   grMPV[0]-> SetTitle( " Landau Most Probable Value for different detector configurations and #mu^{-} energy 15 GeV  " );
   grMPV[0]->GetHistogram()->SetXTitle(" Pad ");
   grMPV[0]->GetHistogram()->SetYTitle(" Landau MPV (MIPs) (keV) ");
-  grMPV[0]->GetYaxis()->SetRangeUser(0.09,0.11);
+  grMPV[0]->GetYaxis()->SetRangeUser(90.0,120.0);
   //grMPV[0]->GetXaxis()->SetRangeUser(0.,5000.);
   c1->Update();
 
@@ -370,101 +370,11 @@ int main(){//main
   c1->Write();
   c1->Close();
 
-
-
-
-
-
-
-
-  // // grMPV[0]->GetYaxis()->SetRangeUser(0.,100.);
-  // //grMPV[0]->GetXaxis()->SetRangeUser(0.,300.);
-  //   grMPV[0]->SetTitle(mpvname[i]);
-  //   grMPV[0]->GetHistogram()->SetXTitle(" Pad  ");
-  //   grMPV[0]->GetHistogram()->SetYTitle(" Landau MPV (MIPs) (keV) ");
-  //   grMPV[0]->GetYaxis()->SetTitleOffset(1.2);
-  //   // TCanvas *c1 = new TCanvas("c1","mpv",200,10,700,500);
-  //   grMPV[0]->Draw("CPA");
-  //   c1->Update();
-
-  //   // Draw labels on the y axis
-  //   // TText *t = new TText();
-  //   // t->SetTextAlign(32);
-  //   // t->SetTextSize(0.035);
-  //   // t->SetTextFont(72);
-  //   // for (Int_t j=0;j<12;i++) {
-  //   //   t->DrawText(-0.42,padd[j],pad[j]);
-  //   // }
-
-
-  //  //TGraphErrors *gr = new TGraphErrors(mpv.size(),&padd[0],&mpv[0],&mpvr[0],&padr[0]);
-  //   // TGraph *gr = new TGraph(mpv.size(),&padd[0],&mpv[0]);
-  //   // gr->Draw("CPS");
-
-  //   c1->Update();
-  //   c1->Print(mpvname[i]+".png",".png");
-  //   gr->Delete();
-  //   c1->Close();
-  
-  //   // // c1->Print("mpv.png",".png");
-  //   // c1->Close();
- 
-  //   thesigma.clear();
-  //   thesigmaerr.clear();
-  //   padr.clear();
-    
-  //   mpv.clear();
-  //   mpvr.clear();
-
-
-  // } // end of loop over files
- 
-  
-  // myc->cd();
-  // gPad->SetLogz(1);
-  // gStyle->SetOptStat(1111110);
-  // p_nHits->Draw("colz");
-
-  // myc->Update();
-  // myc->Print(plotBase+"/mipHits.png");
-  // myc->Print(plotBase+"/mipHits.pdf");
-  // myc->Print(plotBase+"/mipHits.C");
-
-
-  // myc->cd();
-  // gPad->SetLogy(1);
-  // gStyle->SetOptStat(1111110);
-  // gStyle->SetOptFit(1111);
-  // p_hitEnergy_si->Draw();
-  // p_hitEnergy_si->Fit("landau","R+","",0.069,0.18);
-
-  // myc->Update();
-  // myc->Print(plotBase+"/mipDepositAll_si.png");
-  // myc->Print(plotBase+"/mipDepositAll_si.pdf");
-  // myc->Print(plotBase+"/mipDepositAll_si.C");
-
-  // myc->cd();
-  // gPad->SetLogy(1);
-  // gStyle->SetOptStat(1111110);
-  // gStyle->SetOptFit(1111);
-  // p_hitEnergySel_si->Draw();
-  // p_hitEnergySel_si->Fit("landau","LR+","",0.02,1);
-
-  // myc->Update();
-  // myc->Print(plotBase+"/mipDepositSel_si.png");
-  // myc->Print(plotBase+"/mipDepositSel_si.pdf");
-  // myc->Print(plotBase+"/mipDepositSel_si.C");
-    
-  // myc->cd();
-  // gPad->SetLogy(0);
-  // gStyle->SetOptStat(1111110);
-  // gStyle->SetOptFit(1111);
-  // p_nHits->Draw();
-
-  // myc->Update();
-  // myc->Print(plotBase+"/HitsperLayer_si.png");
-  // myc->Print(plotBase+"/HitsperLayer_si.pdf");
-  // myc->Print(plotBase+"/HitsperLayer_si.C");
+  std::cout << "==================================================" << std::endl;
+  std::cout << "The Mean MPV value for all configurations for the MeVToMIP value" << std::endl;
+  for (int k=0; k<numberoffiles-2; k++){
+    std::cout << "Config " << k << ": " << grMPV[k]->GetMean(2)/1000. << std::endl;
+  }
 
 
   return 0; 
