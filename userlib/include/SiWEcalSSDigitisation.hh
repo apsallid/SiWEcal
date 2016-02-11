@@ -23,16 +23,13 @@ public:
     sigmaPix_(3)
   {
     rndm_.SetSeed(seed_);
-    //noise_[DetectorEnum::ECAL] = 0.12;
-    //noise_[DetectorEnum::FHCAL] = 0.12;
-    //noise_[DetectorEnum::BHCAL] = 0.12;
-    maxADC_[DetectorEnum::SiWEcal] = 65535; // 16-bit
+    maxADC_[DetectorEnum::SiWEcal] = 2000; // 12-bit but saturation starts at 2000
 
-    mipToADC_[DetectorEnum::SiWEcal] = 10;//ADC per mips.
+    mipToADC_[DetectorEnum::SiWEcal] = 60;//ADC per mips.
 
-    timeCut_[DetectorEnum::SiWEcal] = 25;//ns
+    timeCut_[DetectorEnum::SiWEcal] = 300;//ns
 
-    gainSmearing_[DetectorEnum::SiWEcal] = 0.02;//2% intercalibration
+    gainSmearing_[DetectorEnum::SiWEcal] = 0.01;//1% intercalibration
 
     Print(std::cout);
 

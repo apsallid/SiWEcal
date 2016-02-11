@@ -11,7 +11,6 @@ SiWEcalSSDetector & theDetector(){
 
 void SiWEcalSSDetector::buildDetector(const unsigned versionNumber,
 				  bool concept,
-				  bool isCaliceHcal,
 				  bool bypassR){
   
   bypassRadius_ = bypassR;
@@ -22,9 +21,9 @@ void SiWEcalSSDetector::buildDetector(const unsigned versionNumber,
   SiWEcal.name = "SiWEcal";
   SiWEcal.layerIdMin = indices_[0];
   SiWEcal.layerIdMax = indices_[1];
-  SiWEcal.mipWeight = 1./0.0600;//Fill the MIP here from study 
+  SiWEcal.mipWeight = 1./0.087;//mip for 330um si
   SiWEcal.absWeight = 1.;//ratio of abs dedx
-  SiWEcal.gevWeight = 1.0; //MIPToGeV 
+  SiWEcal.gevWeight = 1.0/93.0; //MIPToGeV 
   SiWEcal.gevOffset = 0.0;
   SiWEcal.isSi = true;
   //if (versionNumber>=30) 

@@ -58,7 +58,7 @@ public:
     indices_.clear();
     indices_.resize(2,0);
     //fill layer indices
-    if (versionNumber==2){
+    if (versionNumber!=0){
       indices_[0] = 0;
       indices_[1] = 12;
     }
@@ -68,7 +68,6 @@ public:
 
   void buildDetector(const unsigned versionNumber,
 		     bool concept=true,
-		     bool isCaliceHcal=false,
 		     bool bypassR=false);
 
   const SiWEcalSSSubDetector & subDetectorByLayer(const unsigned aLayer);

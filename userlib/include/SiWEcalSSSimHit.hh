@@ -12,7 +12,7 @@
 #include "Math/Point3D.h"
 #include "Math/Point3Dfwd.h"
 
-static const float CELL_SIZE_X=5.5;//mm
+static const float CELL_SIZE_X=5.53;//mm
 static const float CELL_SIZE_Y=CELL_SIZE_X;
 
 class SiWEcalSSSimHit{

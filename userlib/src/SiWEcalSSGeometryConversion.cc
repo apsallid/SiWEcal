@@ -6,39 +6,17 @@
 SiWEcalSSGeometryConversion::SiWEcalSSGeometryConversion(std::string filePath, const unsigned & model, const double & cellsize, const bool bypassR, const unsigned nSiLayers){
 
   dopatch_=false;
-  width_ = 44;//mm
+  width_ = 88.48;//mm Will set it also in the digitizer
   model_ = model;
-  if (model==1) width_ = 500;
-  else if (model == 2) width_ = 1700*2;
-  else if (model == 3) width_ = 1000;
-  else if (model == 4) width_ = 1300;
+  // if (model==1) width_ = 500;
+  // else if (model == 2) width_ = 1700*2;
+  // else if (model == 3) width_ = 1000;
+  // else if (model == 4) width_ = 1300;
   
   cellSize_ = cellsize;
   bypassRadius_ = bypassR;
   nSiLayers_ = nSiLayers;
 }
-/*
-unsigned SiWEcalSSGeometryConversion::getNumberOfSiLayers(const DetectorEnum type,
-						      const double & eta) const
-{
-  if (model_ != 2) return 3;
-  if (type == DetectorEnum::FHCAL) return 3;
-  unsigned etaBin = 0;
-  if (fabs(eta)>=1.4 && fabs(eta)<=1.75) etaBin = 1;
-  else if (fabs(eta)>1.75 && fabs(eta)<=2.15) etaBin = 2;
-  else if (fabs(eta) > 2.15) etaBin = 3;
-  if (etaBin==0){
-    if (type == DetectorEnum::FECAL) return 2;
-    else if (type == DetectorEnum::MECAL) return 2;
-    else if (type == DetectorEnum::BECAL) return 2;
-  }
-  else {
-    if (etaBin==1) return 3;
-    else if (etaBin==2) return 2;
-    else return 1;
-  }
-  return 3;
-  }*/
 
 unsigned SiWEcalSSGeometryConversion::getNumberOfSiLayers(const DetectorEnum type,
 						      const double & radius) const

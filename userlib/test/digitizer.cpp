@@ -66,7 +66,7 @@ void processHist(const unsigned iL,
 		 TH1F* & p_noise,
 		 const TH2D* histZ,
 		 const double & meanZpos,
-		 const bool isTBsetup,
+		 // const bool isTBsetup,
 		 const SiWEcalSSSubDetector & subdet,
 		 const std::vector<unsigned> & pThreshInADC,
 		 const bool pSaveDigis,
@@ -97,17 +97,17 @@ void processHist(const unsigned iL,
       //double time = 0;
       //if (simE>0) time = histTime->GetBinContent(iX,iY)/simE;
       
-      //fill vector with neighbours and calculate cross-talk
-      double xtalkE = simE;
-      if (isScint){
-	std::vector<double> simEvec;
-	simEvec.push_back(simE);
-	if (iX>1) simEvec.push_back(histE->GetBinContent(iX-1,iY));
-	if (iX<histE->GetNbinsX()) simEvec.push_back(histE->GetBinContent(iX+1,iY));
-	if (iY>1) simEvec.push_back(histE->GetBinContent(iX,iY-1));
-	if (iY<histE->GetNbinsY()) simEvec.push_back(histE->GetBinContent(iX,iY+1));
-	xtalkE = myDigitiser.ipXtalk(simEvec);
-      }
+      // //fill vector with neighbours and calculate cross-talk
+      // double xtalkE = simE;
+      // if (isScint){
+      // 	std::vector<double> simEvec;
+      // 	simEvec.push_back(simE);
+      // 	if (iX>1) simEvec.push_back(histE->GetBinContent(iX-1,iY));
+      // 	if (iX<histE->GetNbinsX()) simEvec.push_back(histE->GetBinContent(iX+1,iY));
+      // 	if (iY>1) simEvec.push_back(histE->GetBinContent(iX,iY-1));
+      // 	if (iY<histE->GetNbinsY()) simEvec.push_back(histE->GetBinContent(iX,iY+1));
+      // 	xtalkE = myDigitiser.ipXtalk(simEvec);
+      // }
       
       //bool passTime = myDigitiser.passTimeCut(adet,time);
       //if (!passTime) continue;
@@ -122,16 +122,17 @@ void processHist(const unsigned iL,
       
 
       //correct for particle angle in conversion to MIP
-      double simEcor = isTBsetup ? xtalkE : myDigitiser.mipCor(xtalkE,x,y,posz);
-      digiE = simEcor;
+      //This is simE in our case. Just like previour lines are missing.
+      // double simEcor = isTBsetup ? xtalkE : myDigitiser.mipCor(xtalkE,x,y,posz);
+      digiE = simE;
       
-      if (isScint && simEcor>0) {
-	digiE = myDigitiser.digiE(simEcor);
-      }
+      // if (isScint && simEcor>0) {
+      // 	digiE = myDigitiser.digiE(simEcor);
+      // }
       myDigitiser.addNoise(digiE,iL,p_noise);
       
-      double noiseFrac = 1.0;
-      if (simEcor>0) noiseFrac = (digiE-simEcor)/simEcor;
+      // double noiseFrac = 1.0;
+      // if (simEcor>0) noiseFrac = (digiE-simEcor)/simEcor;
       
       //for silicon-based Calo
       unsigned adc = 0;
@@ -139,12 +140,16 @@ void processHist(const unsigned iL,
 	adc = myDigitiser.adcConverter(digiE,adet);
 	digiE = myDigitiser.adcToMIP(adc,adet);
       }
-      bool aboveThresh = //digiE > 0.5;
-	(isSi && adc > pThreshInADC[iL]) ||
-	(isScint && digiE > pThreshInADC[iL]*myDigitiser.adcToMIP(1,adet,false));
+
+      double noiseFrac = 1.0;
+      if (simE>0) noiseFrac = (digiE-simE)/simE;
+   
+      // bool aboveThresh = (isSi && adc > pThreshInADC[iL]); 
+      // (isScint && digiE > pThreshInADC[iL]*myDigitiser.adcToMIP(1,adet,false));
       //histE->SetBinContent(iX,iY,digiE);
-      if ((!pSaveDigis && aboveThresh) ||
-	  pSaveDigis)
+      // if ((!pSaveDigis && aboveThresh) ||
+      // if ((!pSaveDigis && aboveThresh) ||
+      if ((!pSaveDigis) || pSaveDigis)
 	{//save hits
 	  //double calibE = myDigitiser.MIPtoGeV(subdet,digiE);
 	  SiWEcalSSRecoHit lRecHit;
@@ -285,7 +290,6 @@ int main(int argc, char** argv){//main
   const unsigned versionNumber = info->version();
   const unsigned model = info->model();
   
-  //models 0,1 or 3.
   bool isTBsetup = true;
   if (isTBsetup) std::cout << " -- Number of Si layers: " << nSiLayers << std::endl;
   else std::cout << " -- Number of Si layers ignored: hardcoded as a function of radius in SiWEcalSSGeometryConversion class." << std::endl;
@@ -298,7 +302,6 @@ int main(int argc, char** argv){//main
     
   //initialise detector
   SiWEcalSSDetector & myDetector = theDetector();
-  bool isCaliceHcal = false;
 
   std::cout << " -- Version number is : " << versionNumber 
 	    << ", model = " << model
@@ -307,7 +310,8 @@ int main(int argc, char** argv){//main
 
   bool bypassR = false;
   if (isTBsetup) bypassR = true;
-  myDetector.buildDetector(versionNumber,concept,isCaliceHcal,bypassR);
+  // myDetector.buildDetector(versionNumber,concept,isCaliceHcal,bypassR);
+  myDetector.buildDetector(versionNumber,concept,bypassR);
 
   //initialise calibration class
   SiWEcalSSCalibration mycalib(inFilePath,bypassR,nSiLayers);
@@ -316,15 +320,16 @@ int main(int argc, char** argv){//main
 
   SiWEcalSSGeometryConversion geomConv(inFilePath,model,cellSize,bypassR,nSiLayers);
   //const double xWidth = geomConv.getXYwidth();
+  geomConv.setXYwidth(88.48); // Si Sensor width in mm
 
   SiWEcalSSDigitisation myDigitiser;
 
   std::vector<unsigned> granularity;
   granularity.resize(nLayers,1); //keeping the virtual sim cell size for the rec hit cell size also
   std::vector<double> pNoiseInMips;
-  pNoiseInMips.resize(nLayers,0.12); //Initialize with 0.12 MIPS for noise, but change on input
+  pNoiseInMips.resize(nLayers,0.05556); //Initialize with 0.05556 MIPS for noise, but can change on input
   std::vector<unsigned> pThreshInADC;
-  pThreshInADC.resize(nLayers,5);
+  pThreshInADC.resize(nLayers,17); // 5 x noise ~ 17 ADC channels. Offline only. Not cut here. 
 
   extractParameterFromStr<std::vector<unsigned> >(granulStr,granularity);
   extractParameterFromStr<std::vector<double> >(noiseStr,pNoiseInMips);
@@ -442,11 +447,11 @@ int main(int argc, char** argv){//main
       double posy = lHit.get_y(cellSize);
       double radius = sqrt(pow(posx,2)+pow(posy,2));
       double posz = lHit.get_z();
-      double energy = lHit.energy()*mycalib.MeVToMip(layer,radius);
+      // double energy = lHit.energy()*mycalib.MeVToMip(layer,radius);
+      double energy = lHit.energy()*mycalib.MeVToMip(layer,false);
       double realtime = mycalib.correctTime(lHit.time(),posx,posy,posz);
       bool passTime = myDigitiser.passTimeCut(type,realtime);
-      //****** What time cut to put?
-      //if (!passTime) continue;
+      if (!passTime) continue;
       //std::cout << "*******" << lHit.silayer() << " " << geomConv.getNumberOfSiLayers(type,radius) << std::endl;
       if (energy>0 && 
 	  lHit.silayer() < geomConv.getNumberOfSiLayers(type,radius) 
@@ -469,7 +474,7 @@ int main(int argc, char** argv){//main
 
     //create hits, everywhere to have also pure noise
     //digitise
-    //apply threshold
+    //do not apply threshold
     //save
     unsigned nTotBins = 0;
     for (unsigned iL(0); iL<nLayers; ++iL){//loop on layers
@@ -500,8 +505,10 @@ int main(int argc, char** argv){//main
 	myDigitiser.setIPCrossTalk(0);
       }
 
-      processHist(iL,false,histE,myDigitiser,p_noise,histZ,meanZpos,isTBsetup,subdet,pThreshInADC,pSaveDigis,lDigiHits,lRecoHits);
-      if (!isScint && !bypassR) processHist(iL,true,histEs,myDigitiser,p_noise,histZ,meanZpos,isTBsetup,subdet,pThreshInADC,pSaveDigis,lDigiHits,lRecoHits);
+      // processHist(iL,false,histE,myDigitiser,p_noise,histZ,meanZpos,isTBsetup,subdet,pThreshInADC,pSaveDigis,lDigiHits,lRecoHits);
+      // if (!isScint && !bypassR) processHist(iL,true,histEs,myDigitiser,p_noise,histZ,meanZpos,isTBsetup,subdet,pThreshInADC,pSaveDigis,lDigiHits,lRecoHits);
+      processHist(iL,false,histE,myDigitiser,p_noise,histZ,meanZpos,subdet,pThreshInADC,pSaveDigis,lDigiHits,lRecoHits);
+      if (!isScint && !bypassR) processHist(iL,true,histEs,myDigitiser,p_noise,histZ,meanZpos,subdet,pThreshInADC,pSaveDigis,lDigiHits,lRecoHits);
  
     }//loop on layers
 

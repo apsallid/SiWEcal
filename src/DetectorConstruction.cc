@@ -718,7 +718,11 @@ void DetectorConstruction::buildStack(const unsigned sectorNum)
 
 	std::string baseName(nameBuf);
 	G4double thick = m_caloStruct[i].ele_thick[ie];
-	G4double width = 88.0*mm; //Hardcoded should fix these
+	//One sensor has a size of 89.960 +/- 0.040 mm, and it is a matrix of
+	//16x16 pixels with a pitch of 5.53 mm. So, 16 * 5.53 = 88.48 mm 
+	//Since width is used for every volume we set with to 
+	//2*88.48 mm + 2 * gap between sensors in center  = 177.16 mm 
+	G4double width = 177.16*mm; //Hardcoded should fix these
 	G4double height = 17.0*mm; //For SKIROC
 	if (skirocvol){width = 17.0*mm;}
 
@@ -746,16 +750,16 @@ void DetectorConstruction::buildStack(const unsigned sectorNum)
 	  //std::cout << "Element of ele_vol is " << nEle*sectorNum  << std::endl;
 	  if (eleName=="Si"){
 	    switch (idx) {
-	    case 1: xpvpos = -width/4. - gapx; ypvpos = -width/4. - gapy; break;
-	    case 2: xpvpos = -width/4. - gapx; ypvpos = width/4. + gapy; break;
-	    case 3: xpvpos = width/4. + gapx; ypvpos = -width/4. - gapy; break;
-	    case 4: xpvpos = width/4. + gapx; ypvpos = width/4. + gapy; break;
+	    case 1: xpvpos = -(width-0.2)/4. - gapx; ypvpos = -(width-0.2)/4. - gapy; break;
+	    case 2: xpvpos = -(width-0.2)/4. - gapx; ypvpos = (width-0.2)/4. + gapy; break;
+	    case 3: xpvpos = (width-0.2)/4. + gapx; ypvpos = -(width-0.2)/4. - gapy; break;
+	    case 4: xpvpos = (width-0.2)/4. + gapx; ypvpos = (width-0.2)/4. + gapy; break;
 	    }	    
 	  }
 	  if(skirocvol){
 	    //The 4x4 structure of chips. I will assume for now that the 4 chips
 	    //are symmetrical placed in every Si pad and will take the Si pad hardcoded for now. 
-  	    G4double sipadwidth = 44.0*mm;//Should fix this !!!
+  	    G4double sipadwidth = 88.48*mm;//Should fix this !!!
 	    G4double auxdisvarx =  gapx + (sipadwidth/4.);
 	    G4double auxdisvary =  gapy + (sipadwidth/4.);
 	    switch (chip_index) {
@@ -856,9 +860,9 @@ G4CSGSolid *DetectorConstruction::constructSolid (std::string baseName, const G4
   G4CSGSolid *solid;
   if(sivol){
     //This is for the 2 by 2 Si pads
-    solid = new G4Box(baseName+"box", width/4, width/4, thick/2 );
+    solid = new G4Box(baseName+"box", (width-0.2)/4., (width-0.2)/4., thick/2 );
   } else if (skiroc){
-    //SKIROC is not square is orthogonal?
+    //SKIROC
     solid = new G4Box(baseName+"box", width/2, height/2, thick/2 );
   } else {
     solid = new G4Box(baseName+"box", width/2, width/2, thick/2 );

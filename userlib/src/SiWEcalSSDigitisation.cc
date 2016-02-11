@@ -133,10 +133,10 @@ void SiWEcalSSDigitisation::Print(std::ostream & aOs) const{
       << "=== INIT DIGITISATION PARAMETERS ===" << std::endl
       << "====================================" << std::endl
       << " = Random seed: " << rndm_.GetSeed() << std::endl
-      << " = Nphoto-electrons: " << npe_ << std::endl
-      << " = cross-talk: " << crossTalk_ << std::endl
-      << " = Npixels total: " << nTotal_ << std::endl
-      << " = sigmaPixel: " << sigmaPix_ << std::endl
+      // << " = Nphoto-electrons: " << npe_ << std::endl
+      // << " = cross-talk: " << crossTalk_ << std::endl
+      // << " = Npixels total: " << nTotal_ << std::endl
+      // << " = sigmaPixel: " << sigmaPix_ << std::endl
     //<< " = sigmaNoise: ECAL " << noise_.find(DetectorEnum::ECAL)->second << ", FHCAL " << noise_.find(DetectorEnum::FHCAL)->second << ", BHCAL " << noise_.find(DetectorEnum::BHCAL)->second << std::endl
       << " = MIPtoADC conversions: SiWEcal " << mipToADC_.find(DetectorEnum::SiWEcal)->second << std::endl
       << " = Time cut: SiWEcal " << timeCut_.find(DetectorEnum::SiWEcal)->second << std::endl
