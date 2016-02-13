@@ -25,6 +25,9 @@ SiWEcalSSSimHit::SiWEcalSSSimHit(const G4SiHit & aSiHit, const unsigned & asilay
 
   encodeCellId(x_side,y_side,x_cell,y_cell);
 
+  // std::cout << "SiLayer " << layer_ << " Hit x " << x << " Hit y " << y << std::endl; 
+  // std::cout << "After decoding Hit x " << get_x(CELL_SIZE_X) << " Hit y " <<  get_y(CELL_SIZE_Y) << std::endl; 
+
   nGammas_= 0;
   nElectrons_ = 0;
   nMuons_ = 0;

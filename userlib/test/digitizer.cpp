@@ -79,12 +79,13 @@ void processHist(const unsigned iL,
   bool isSi = subdet.isSi;
 
   double rLim = subdet.radiusLim;
-
+  
   for (int iX(1); iX<histE->GetNbinsX()+1;++iX){
     for (int iY(1); iY<histE->GetNbinsY()+1;++iY){
 
       double x = histE->GetXaxis()->GetBinCenter(iX);
       double y = histE->GetYaxis()->GetBinCenter(iY);
+      
       double radius = sqrt(pow(x,2)+pow(y,2));
 
       //if (iY==1) std::cout << " Layer " << iL << " " << x << " " << y << std::endl;
@@ -94,29 +95,19 @@ void processHist(const unsigned iL,
 
       double digiE = 0;
       double simE = histE->GetBinContent(iX,iY);
-      //double time = 0;
-      //if (simE>0) time = histTime->GetBinContent(iX,iY)/simE;
-      
-      // //fill vector with neighbours and calculate cross-talk
-      // double xtalkE = simE;
-      // if (isScint){
-      // 	std::vector<double> simEvec;
-      // 	simEvec.push_back(simE);
-      // 	if (iX>1) simEvec.push_back(histE->GetBinContent(iX-1,iY));
-      // 	if (iX<histE->GetNbinsX()) simEvec.push_back(histE->GetBinContent(iX+1,iY));
-      // 	if (iY>1) simEvec.push_back(histE->GetBinContent(iX,iY-1));
-      // 	if (iY<histE->GetNbinsY()) simEvec.push_back(histE->GetBinContent(iX,iY+1));
-      // 	xtalkE = myDigitiser.ipXtalk(simEvec);
-      // }
+      // double time = 0;
+      // if (simE>0) time = histTime->GetBinContent(iX,iY)/simE;
       
       //bool passTime = myDigitiser.passTimeCut(adet,time);
       //if (!passTime) continue;
       
       double posz = meanZpos;
       //for noise only hits
-      //if (simE>0) posz = histZ->GetBinContent(iX,iY)/simE;
-      //else posz = meanZpos;
+      // double posz = 0.;
+      if (simE>0) posz = histZ->GetBinContent(iX,iY)/simE;
+      else posz = meanZpos;
 
+      // if (posz==0.){std::cout << " x=" << x << ", y=" << y << std::endl;}
       
       //if (fabs(x) > 500 || fabs(y)>500) std::cout << " x=" << x << ", y=" << y << std::endl;
       
@@ -125,10 +116,13 @@ void processHist(const unsigned iL,
       //This is simE in our case. Just like previour lines are missing.
       // double simEcor = isTBsetup ? xtalkE : myDigitiser.mipCor(xtalkE,x,y,posz);
       digiE = simE;
+
+      // std::cout << "simE " << simE << std::endl;
       
       // if (isScint && simEcor>0) {
       // 	digiE = myDigitiser.digiE(simEcor);
       // }
+
       myDigitiser.addNoise(digiE,iL,p_noise);
       
       // double noiseFrac = 1.0;
@@ -141,15 +135,19 @@ void processHist(const unsigned iL,
 	digiE = myDigitiser.adcToMIP(adc,adet);
       }
 
+      // if(simE>0.)std::cout << "simE " << simE << " adc " <<  adc << " energy in digis " << digiE << std::endl;
+
       double noiseFrac = 1.0;
       if (simE>0) noiseFrac = (digiE-simE)/simE;
-   
-      // bool aboveThresh = (isSi && adc > pThreshInADC[iL]); 
+      
+      // bool aboveThresh = digiE > (pThreshInADC[iL]*myDigitiser.adcToMIP(1,adet,false));
+      bool aboveThresh = (isSi && adc > pThreshInADC[iL]); 
       // (isScint && digiE > pThreshInADC[iL]*myDigitiser.adcToMIP(1,adet,false));
       //histE->SetBinContent(iX,iY,digiE);
       // if ((!pSaveDigis && aboveThresh) ||
       // if ((!pSaveDigis && aboveThresh) ||
-      if ((!pSaveDigis) || pSaveDigis)
+      // if ( ( (!pSaveDigis) && aboveThresh)  || pSaveDigis)
+      if ( aboveThresh )
 	{//save hits
 	  //double calibE = myDigitiser.MIPtoGeV(subdet,digiE);
 	  SiWEcalSSRecoHit lRecHit;
@@ -239,34 +237,12 @@ int main(int argc, char** argv){//main
   if (nPar > nReqA+2) std::istringstream(argv[nReqA+2])>>pSaveSims;
   if (nPar > nReqA+3) std::istringstream(argv[nReqA+3])>>pSaveDigis;
   
-  //try to get model automatically
-  //if (inFilePath.find("model0")!=inFilePath.npos) pModel = "model0";
-  //else if (inFilePath.find("model1")!=inFilePath.npos) pModel = "model1";
-  //else if (inFilePath.find("model2")!=inFilePath.npos) pModel = "model2";
-  //else if (inFilePath.find("model3")!=inFilePath.npos) pModel = "model3";
-
-
-  //std::cout << " -- Model is set to : " << pModel << std::endl;
   std::cout<< " -- Random seed will be set to : " << pSeed << std::endl;
   if (pSaveDigis) std::cout << " -- DigiHits are saved." << std::endl;
   if (pSaveSims) std::cout << " -- SimHits are saved." << std::endl;
   std::cout << " ----------------------------------------" << std::endl;
   
-  //////////////////////////////////////////////////////////
-  //// Hardcoded config ////////////////////////////////////
-  //////////////////////////////////////////////////////////
-  //for HGCAL, true means only 12 FHCAL layers considered (24 are simulated)
-  bool concept = true;
-
-  //////////////////////////////////////////////////////////
-  //// End Hardcoded config ////////////////////////////////////
-  //////////////////////////////////////////////////////////
-
-
-  /////////////////////////////////////////////////////////////
   //input
-  /////////////////////////////////////////////////////////////
-
   std::string inputStr = inFilePath ;
   TFile *inputFile = TFile::Open(inputStr.c_str());
   
@@ -280,10 +256,6 @@ int main(int argc, char** argv){//main
     std::cout << " -- Error, tree SiWEcalSSTree  cannot be opened. Exiting..." << std::endl;
     return 1;
   }
-
-  /////////////////////////////////////////////////////////////
-  //input tree
-  /////////////////////////////////////////////////////////////
 
   SiWEcalSSInfo * info=(SiWEcalSSInfo*)inputFile->Get("Info");
   const double cellSize = info->cellSize();
@@ -310,8 +282,7 @@ int main(int argc, char** argv){//main
 
   bool bypassR = false;
   if (isTBsetup) bypassR = true;
-  // myDetector.buildDetector(versionNumber,concept,isCaliceHcal,bypassR);
-  myDetector.buildDetector(versionNumber,concept,bypassR);
+  myDetector.buildDetector(versionNumber,bypassR);
 
   //initialise calibration class
   SiWEcalSSCalibration mycalib(inFilePath,bypassR,nSiLayers);
@@ -319,8 +290,9 @@ int main(int argc, char** argv){//main
   const unsigned nLayers = myDetector.nLayers();
 
   SiWEcalSSGeometryConversion geomConv(inFilePath,model,cellSize,bypassR,nSiLayers);
-  //const double xWidth = geomConv.getXYwidth();
-  geomConv.setXYwidth(88.48); // Si Sensor width in mm
+  geomConv.setXYwidth(88.48); // Single Si Sensor width.
+  const double xWidth = geomConv.getXYwidth();
+  std::cout << " -- XYwidth of silicon pads " << xWidth << std::endl;
 
   SiWEcalSSDigitisation myDigitiser;
 
@@ -361,10 +333,7 @@ int main(int argc, char** argv){//main
 
   myDigitiser.setIntercalibrationFactor(interCalib);
 
-  /////////////////////////////////////////////////////////////
   //output
-  /////////////////////////////////////////////////////////////
-
   std::ostringstream outputStr;
   outputStr << outFilePath << "/DigiPFcal" ;
   if (pSaveDigis)  outputStr << "_withDigiHits";
@@ -435,7 +404,8 @@ int main(int argc, char** argv){//main
 
       //do not save hits with 0 energy...
       if (lHit.energy()>0 && pSaveSims) lSimHits.push_back(lHit);
-      unsigned layer = lHit.layer();
+      double layer = (4*lHit.layer()) + lHit.silayer(); 
+      //unsigned layer = lHit.layer();
       if (layer != prevLayer){
 	const SiWEcalSSSubDetector & subdet = myDetector.subDetectorByLayer(layer);
 	type = subdet.type;
@@ -443,19 +413,23 @@ int main(int argc, char** argv){//main
 	prevLayer = layer;
 	if (debug > 1) std::cout << " - layer " << layer << " " << subdet.name << " " << subdetLayer << std::endl;
       }
+
+      //This is the position of the hit with respect to virtual cells that divide each layer 0,1,2
+      //So the whole layer contains silayers 0,1,2,3 
+      //We should make transformation to the real pixel cells taking into account the 0.1 mm gap in the center
       double posx = lHit.get_x(cellSize);
       double posy = lHit.get_y(cellSize);
+       std::cout << "posx " << posx << " posy " << posy <<std::endl;
       double radius = sqrt(pow(posx,2)+pow(posy,2));
       double posz = lHit.get_z();
       // double energy = lHit.energy()*mycalib.MeVToMip(layer,radius);
       double energy = lHit.energy()*mycalib.MeVToMip(layer,false);
+      // std::cout << "Uncalib energy " << lHit.energy() << " MeVToMIP " << mycalib.MeVToMip(layer,false) << " Calib energy " <<  energy << std::endl;
       double realtime = mycalib.correctTime(lHit.time(),posx,posy,posz);
       bool passTime = myDigitiser.passTimeCut(type,realtime);
       if (!passTime) continue;
-      //std::cout << "*******" << lHit.silayer() << " " << geomConv.getNumberOfSiLayers(type,radius) << std::endl;
-      if (energy>0 && 
-	  lHit.silayer() < geomConv.getNumberOfSiLayers(type,radius) 
-	  ){
+      // std::cout << "*******" << (4*lHit.layer()) + lHit.silayer() << " " << geomConv.getNumberOfSiLayers(type,radius) << std::endl;
+      if (energy>0 && ( layer < geomConv.getNumberOfSiLayers(type,radius) ) ){
 	if (debug > 1) std::cout << " hit " << iH 
 				 << " lay " << layer  
 				 << " x " << posx 
@@ -479,14 +453,16 @@ int main(int argc, char** argv){//main
     unsigned nTotBins = 0;
     for (unsigned iL(0); iL<nLayers; ++iL){//loop on layers
       TH2D *histE = geomConv.get2DHist(iL,"E");
-      TH2D *histEs = geomConv.get2DHist(iL,"ESmall");
-      TH2D *histTime = geomConv.get2DHist(iL,"Time");
+      // TH2D *histEs = geomConv.get2DHist(iL,"ESmall");
+      // TH2D *histTime = geomConv.get2DHist(iL,"Time");
       TH2D *histZ = geomConv.get2DHist(iL,"Z");
       const SiWEcalSSSubDetector & subdet = myDetector.subDetectorByLayer(iL);
       bool isScint = subdet.isScint;
       nTotBins += histE->GetNbinsX()*histE->GetNbinsY();
       if (pSaveDigis) lDigiHits.reserve(nTotBins);
 
+      //Here is the z position
+      //meanZpos = (E_i * Z_i)/E_i
       double meanZpos = geomConv.getAverageZ(iL);
       
       //std::cout << iL << " " << meanZpos << std::endl;
@@ -505,10 +481,7 @@ int main(int argc, char** argv){//main
 	myDigitiser.setIPCrossTalk(0);
       }
 
-      // processHist(iL,false,histE,myDigitiser,p_noise,histZ,meanZpos,isTBsetup,subdet,pThreshInADC,pSaveDigis,lDigiHits,lRecoHits);
-      // if (!isScint && !bypassR) processHist(iL,true,histEs,myDigitiser,p_noise,histZ,meanZpos,isTBsetup,subdet,pThreshInADC,pSaveDigis,lDigiHits,lRecoHits);
       processHist(iL,false,histE,myDigitiser,p_noise,histZ,meanZpos,subdet,pThreshInADC,pSaveDigis,lDigiHits,lRecoHits);
-      if (!isScint && !bypassR) processHist(iL,true,histEs,myDigitiser,p_noise,histZ,meanZpos,subdet,pThreshInADC,pSaveDigis,lDigiHits,lRecoHits);
  
     }//loop on layers
 

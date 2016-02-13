@@ -69,7 +69,7 @@ OBJS=$(subst $(SRCDIR), $(OBJDIR),$(subst cc,$(OBJ_EXT),$(SRCS)))
 
 #BINS=$(EXEDIR)/getAbsorberWeight
 
-BINS=$(EXEDIR)/mipDeposit $(EXEDIR)/mipEvolution
+BINS=$(EXEDIR)/mipDeposit $(EXEDIR)/mipEvolution $(EXEDIR)/validation
 
 #BINS=$(EXEDIR)/egammaResolution $(EXEDIR)/higgsResolution
 

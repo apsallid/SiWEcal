@@ -67,7 +67,6 @@ public:
   };
 
   void buildDetector(const unsigned versionNumber,
-		     bool concept=true,
 		     bool bypassR=false);
 
   const SiWEcalSSSubDetector & subDetectorByLayer(const unsigned aLayer);

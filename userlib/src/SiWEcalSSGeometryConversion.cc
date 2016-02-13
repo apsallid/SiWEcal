@@ -269,11 +269,22 @@ void SiWEcalSSGeometryConversion::resetVector(std::vector<TH2D *> & aVec,
 	double max=1695;
 	double minx = min;
 	double maxx = max;
+	double gapx = 0.1; double gapy = 0.1; double xpvpos = 0.; double ypvpos = 0.;
 	if (getGranularity(iL,aDet) == 1) {
 	  double newcellsize = cellSize_*getGranularity(iL,aDet);
-	  nBins = static_cast<unsigned>(width_*1./cellSize_);
-	  min = -1.0*nBins*newcellsize/2.;
-	  max = nBins*newcellsize/2.;
+	  nBins = static_cast<unsigned>( (width_ + 0.5 )*1./cellSize_); //Add 0.5 for the rounding
+	  switch ( (int) iL%4  ) {
+	  case 0: xpvpos = -(width_-0.2)/4. - gapx; ypvpos = -(width_-0.2)/4. - gapy; break;
+	  case 1: xpvpos = -(width_-0.2)/4. - gapx; ypvpos = (width_-0.2)/4. + gapy; break;
+	  case 2: xpvpos = (width_-0.2)/4. + gapx; ypvpos = -(width_-0.2)/4. - gapy; break;
+	  case 3: xpvpos = (width_-0.2)/4. + gapx; ypvpos = (width_-0.2)/4. + gapy; break;
+	  }
+
+	  minx = (-1.0*nBins*newcellsize/2.) + xpvpos;
+	  maxx = (nBins*newcellsize/2.) + xpvpos;
+	  min = (-1.0*nBins*newcellsize/2.) + ypvpos;
+	  max = (nBins*newcellsize/2.) + ypvpos;
+	  
 	// }
 	// else {
 	// if (aDet.isScint || bypassRadius_ || model_!=2){

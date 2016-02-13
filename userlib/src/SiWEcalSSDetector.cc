@@ -10,7 +10,6 @@ SiWEcalSSDetector & theDetector(){
 }
 
 void SiWEcalSSDetector::buildDetector(const unsigned versionNumber,
-				  bool concept,
 				  bool bypassR){
   
   bypassRadius_ = bypassR;
