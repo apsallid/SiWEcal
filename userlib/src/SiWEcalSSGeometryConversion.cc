@@ -269,21 +269,33 @@ void SiWEcalSSGeometryConversion::resetVector(std::vector<TH2D *> & aVec,
 	double max=1695;
 	double minx = min;
 	double maxx = max;
-	double gapx = 0.1; double gapy = 0.1; double xpvpos = 0.; double ypvpos = 0.;
+	double gapx = 0.1; double gapy = 0.1; 
 	if (getGranularity(iL,aDet) == 1) {
 	  double newcellsize = cellSize_*getGranularity(iL,aDet);
-	  nBins = static_cast<unsigned>( (width_ + 0.5 )*1./cellSize_); //Add 0.5 for the rounding
+	  nBins = static_cast<unsigned>( (width_ + 0.5 )*1./newcellsize); //Add 0.5 for the rounding
 	  switch ( (int) iL%4  ) {
-	  case 0: xpvpos = -(width_-0.2)/4. - gapx; ypvpos = -(width_-0.2)/4. - gapy; break;
-	  case 1: xpvpos = -(width_-0.2)/4. - gapx; ypvpos = (width_-0.2)/4. + gapy; break;
-	  case 2: xpvpos = (width_-0.2)/4. + gapx; ypvpos = -(width_-0.2)/4. - gapy; break;
-	  case 3: xpvpos = (width_-0.2)/4. + gapx; ypvpos = (width_-0.2)/4. + gapy; break;
+	  case 0: minx = -width_ - gapx; maxx = - gapx; 
+	    min = -width_ - gapy; max = - gapy;
+	    break;
+	    //xpvpos = -width_ - gapx; ypvpos = -width_ - gapy; 
+	  case 1: minx = -width_ - gapx; maxx = - gapx; 
+	    min = gapy; max = width_ + gapy;
+	    break;
+	    // xpvpos = -width_ - gapx; ypvpos = width_ + gapy; 
+	  case 2: minx = gapx; maxx = width_ + gapx;
+	    min = -width_ - gapy; max = - gapy;
+	    break;
+	    // xpvpos = width_ + gapx; ypvpos = -width_ - gapy; 
+	  case 3: minx = gapx; maxx = width_ + gapx;
+	    min = gapy;  max = width_ + gapy;
+	    break; 
+	    // xpvpos = width_ + gapx; ypvpos = width_ + gapy; 
 	  }
 
-	  minx = (-1.0*nBins*newcellsize/2.) + xpvpos;
-	  maxx = (nBins*newcellsize/2.) + xpvpos;
-	  min = (-1.0*nBins*newcellsize/2.) + ypvpos;
-	  max = (nBins*newcellsize/2.) + ypvpos;
+	  // minx = (-1.0*nBins*newcellsize/2.);
+	  // maxx = (nBins*newcellsize/2.);
+	  // min = (-1.0*nBins*newcellsize/2.);
+	  // max = (nBins*newcellsize/2.);
 	  
 	// }
 	// else {

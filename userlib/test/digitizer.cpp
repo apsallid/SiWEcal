@@ -108,7 +108,7 @@ void processHist(const unsigned iL,
       else posz = meanZpos;
 
       // if (posz==0.){std::cout << " x=" << x << ", y=" << y << std::endl;}
-      
+      // std::cout << " x=" << x << ", y=" << y << std::endl;
       //if (fabs(x) > 500 || fabs(y)>500) std::cout << " x=" << x << ", y=" << y << std::endl;
       
 
@@ -135,13 +135,17 @@ void processHist(const unsigned iL,
 	digiE = myDigitiser.adcToMIP(adc,adet);
       }
 
-      // if(simE>0.)std::cout << "simE " << simE << " adc " <<  adc << " energy in digis " << digiE << std::endl;
-
+      // if(simE>0.)std::cout << "simE " << simE << " adc " <<  adc << " energy in mips " << digiE << std::endl;
+ 
       double noiseFrac = 1.0;
       if (simE>0) noiseFrac = (digiE-simE)/simE;
       
+      // if (noiseFrac==1) std::cout << "simE " << simE << " adc " <<  adc << " energy in mips " << digiE << std::endl;
+
       // bool aboveThresh = digiE > (pThreshInADC[iL]*myDigitiser.adcToMIP(1,adet,false));
-      bool aboveThresh = (isSi && adc > pThreshInADC[iL]); 
+      // bool aboveThresh = (isSi && adc > pThreshInADC[iL]); 
+      // bool aboveThresh = (isSi && (adc > pThreshInADC[iL]) && (simE>0.) ); 
+      bool aboveThresh = ( isSi && (adc > pThreshInADC[iL]) ); 
       // (isScint && digiE > pThreshInADC[iL]*myDigitiser.adcToMIP(1,adet,false));
       //histE->SetBinContent(iX,iY,digiE);
       // if ((!pSaveDigis && aboveThresh) ||
@@ -419,7 +423,7 @@ int main(int argc, char** argv){//main
       //We should make transformation to the real pixel cells taking into account the 0.1 mm gap in the center
       double posx = lHit.get_x(cellSize);
       double posy = lHit.get_y(cellSize);
-       std::cout << "posx " << posx << " posy " << posy <<std::endl;
+       // std::cout << "posx " << posx << " posy " << posy <<std::endl;
       double radius = sqrt(pow(posx,2)+pow(posy,2));
       double posz = lHit.get_z();
       // double energy = lHit.energy()*mycalib.MeVToMip(layer,radius);
