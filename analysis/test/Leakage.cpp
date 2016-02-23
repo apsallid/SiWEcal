@@ -48,29 +48,56 @@ int main(){//main
   // const int numberofpads = 12; 
   //======================================================================================
   //Particle type and energy
-  TString particle = "e-"; //mu+
-  // const int numberofenergies = 6; // 15 30 50 80 100 150
-  const int numberofenergies = 1; // 15 30 50 80 100 150
+  TString particle = "mu-"; //mu+
+  const int numberofenergies = 6; // 15 30 50 80 100 150
+  //const int numberofenergies = 1; // 15 30 50 80 100 150
  // int particleenergy = 15;
   std::vector<int> particleenergies;
   particleenergies.clear();
   particleenergies.push_back(15);
-  // particleenergies.push_back(30);
-  // particleenergies.push_back(50);
-  // particleenergies.push_back(80);
-  // particleenergies.push_back(100);
-  // particleenergies.push_back(150);
+  particleenergies.push_back(30);
+  particleenergies.push_back(50);
+  particleenergies.push_back(80);
+  particleenergies.push_back(100);
+  particleenergies.push_back(150);
 
   //======================================================================================
   //Read all files and tree
   TString filename[numberofconfigs][numberofenergies][numberoffiles];
   for (int k=0; k<numberofconfigs; k++){
     for (int l=0; l<numberofenergies; l++){
+
+      // //Here we need to know the exact number of the files 
+      // std::string linux_command1 =  "/eos/cms/store/group/phys_b2g/apsallid/SiWEcal/DetectorConfigurations/Config_" + IntToString(configs[k]);
+      // std::string linux_command2 =  "/" + particle; 
+      // std::string linux_command3 =  "/" + IntToString(particleenergies[l]);
+      // std::string linux_command4 = "/results";
+      // std::string path =  linux_command1 + linux_command2 + linux_command3 + linux_command4;
+      // std::string linux_command5 = " >> pp.txt ";
+
+      // std::string linux_command6 = "eos ls " + path; 
+      // std::string linux_command = linux_command6 + linux_command5; 
+      // system(linux_command.c_str());
+      // std::ifstream pp_file("pp.txt");
+      // std::string buffer;
+      // getline(pp_file, buffer);
+      // std::istringstream is(buffer);
+      // is >> numoffilesindataset;
+      // pp_file.close();
+      // system("rm -rf pp.txt");
+ 
+
+
+
+
+
+
       for (int j=0; j<numberoffiles; j++){
       TString fp = "SiWEcal_" + IntToString(configs[k]);	
       TString sp = "_" + particle;
       TString tp = "_" + IntToString(particleenergies[l]);
-      TString fop = "_GeV_" + IntToString(j);
+      // TString fop = "GeV_" + IntToString(j);
+      TString fop = "GeV";
       filename[k][l][j] = fp + sp + tp + fop;
       //std::cout << filename[k] << std::endl;
       }
@@ -92,7 +119,7 @@ int main(){//main
 	// files[k][l][j] = TFile::Open("/afs/cern.ch/work/a/apsallid/CMS/Geant4/SiWEcal/"+filename[k][l][j]+".root");
 	// files[k][l] = TFile::Open("/tmp/apsallid/Configs/"+filename[k][l]+".root");
 	// lTree[k][l] = (TTree*) files[k][l]->Get("SiWEcalSSTree");
-	lChain[k][l]->Add("/tmp/apsallid/Configs/"+filename[k][l][j]+".root");
+	lChain[k][l]->Add("/tmp/apsallid/"+filename[k][l][j]+".root");
       }
     }
   }
@@ -123,10 +150,10 @@ int main(){//main
   h_lossinsilicon.clear();
 
   for (Int_t k=0; k<numberofenergies; k++){
-    h_Leakagefrombehind.push_back(new TH1F(("h_Leakagefrombehind_" + IntToString(particleenergies[k])).c_str(),";E (GeV);SimHits",50,0.1,10));
-    h_lossbeforecalo.push_back(new TH1F(("h_lossbeforecalo_" + IntToString(particleenergies[k])).c_str(),";E (GeV);SimHits",50,0.1,10));
-    h_lossinpassivelayers.push_back(new TH1F(("h_lossinpassivelayers_" + IntToString(particleenergies[k])).c_str(),";E (GeV);SimHits",50,0.1,10));
-    h_lossinsilicon.push_back(new TH1F(("h_lossinsilicon_" + IntToString(particleenergies[k])).c_str(),";E (GeV);SimHits",50,0.1,10));
+    h_Leakagefrombehind.push_back(new TH1F(("h_Leakagefrombehind_" + IntToString(particleenergies[k])).c_str(),";E (GeV);SimHits",160,0.,160.));
+    h_lossbeforecalo.push_back(new TH1F(("h_lossbeforecalo_" + IntToString(particleenergies[k])).c_str(),";E (GeV);SimHits",160,0.,160.));
+    h_lossinpassivelayers.push_back(new TH1F(("h_lossinpassivelayers_" + IntToString(particleenergies[k])).c_str(),";E (GeV);SimHits",160,0.,160.));
+    h_lossinsilicon.push_back(new TH1F(("h_lossinsilicon_" + IntToString(particleenergies[k])).c_str(),";E (MeV);SimHits",250,0.,250.));
   }
 
   //======================================================================================
@@ -151,7 +178,7 @@ int main(){//main
       for (Int_t ievt=0; ievt<lChain[k][l]->GetEntries(); ievt++) {
 	// 	// if (ievt != 0) {continue;}
       	lChain[k][l]->GetEntry(ievt);
-	// if (ievt%(1000)==0) std::cout << "Entry " << ievt << std::endl;
+	if (ievt%(10000)==0) std::cout << "Entry " << ievt << std::endl;
 	// std::cout << "Entry " << ievt << std::endl;
 	double losseverywherebuttheendandsensors = 0.;
 	double lossinsensors = 0.;
@@ -164,7 +191,7 @@ int main(){//main
 	  
  
 	  if ( (*ssvec)[iL].volNb() == 4 ){
-	    std::cout << " Success " <<(*ssvec)[iL].volNb()  <<  " (*ssvec)[iL].absorberE()  " << (*ssvec)[iL].absorberE() << std::endl; 
+	    // std::cout << " Success " <<(*ssvec)[iL].volNb()  <<  " (*ssvec)[iL].absorberE()  " << (*ssvec)[iL].absorberE() << std::endl; 
 	    h_Leakagefrombehind[l]->Fill( (*ssvec)[iL].absorberE()/1000. ); //in GeV
 	  }
 	  if ( (*ssvec)[iL].volNb() == 0 ){
@@ -208,49 +235,167 @@ int main(){//main
   //======================================================================================
   //Make one plot for all different leakage energies
   TCanvas* c1 = new TCanvas("c1", "  ");
+  TCanvas* c2 = new TCanvas("c2", "  ");
+  TCanvas* c3 = new TCanvas("c3", "  ");
+  TCanvas* c4 = new TCanvas("c4", "  ");
   //For the legend
   // TLegend* leg[numberoffiles];
-  TLegend* leg = new TLegend(0.5, 0.7, 0.8, 0.9);
-  leg->SetHeader("Energy");
-  leg->SetFillColor(17);
+  TLegend* leg1 = new TLegend(0.5, 0.7, 0.8, 0.9);
+  leg1->SetHeader("Energy");
+  leg1->SetFillColor(17);
+  TLegend* leg2 = new TLegend(0.5, 0.7, 0.8, 0.9);
+  leg2->SetHeader("Energy");
+  leg2->SetFillColor(17);
+  TLegend* leg3 = new TLegend(0.5, 0.7, 0.8, 0.9);
+  leg3->SetHeader("Energy");
+  leg3->SetFillColor(17);
+  TLegend* leg4 = new TLegend(0.5, 0.7, 0.8, 0.9);
+  leg4->SetHeader("Energy");
+  leg4->SetFillColor(17);
 
   TString procNa[numberofenergies];
   procNa[0] = "15 GeV";
-  // procNa[1] = "30 GeV";
-  // procNa[2] = "50 GeV";
-  // procNa[3] = "80 GeV";
-  // procNa[4] = "100 GeV";
-  // procNa[5] = "150 GeV";
+  procNa[1] = "30 GeV";
+  procNa[2] = "50 GeV";
+  procNa[3] = "80 GeV";
+  procNa[4] = "100 GeV";
+  procNa[5] = "150 GeV";
 
+  //======================================================================================
+  //The files that we will store the results of this analysis for the combined plot
+  TString res_com[numberofconfigs];
+  TFile* results_com[numberofconfigs];
   for (int k=0; k<numberofconfigs; k++){
-    results[k]= TFile::Open(res[k]);
+    TString fp = "SiWEcal_" + IntToString(configs[k]);	
+    res_com[k] = fp + "_combinedplots.root";
+    //std::cout << res[k] << std::endl;
+  }
+  TH1F* hist1,* hist2,* hist3,* hist4;
+
+  TString titleofplot1,titleofplot2,titleofplot; 
+  for (int k=0; k<numberofconfigs; k++){
+    results[k]= TFile::Open(res[k],"read");
     std::cout << "Results file " << res[k] << std::endl;
     
     //======================================================================================
     //Loop on energies
     for (int l=0; l<numberofenergies; l++){
-      TH1F* hist = (TH1F*)results[k]->Get(("h_Leakagefrombehind_" + IntToString(particleenergies[l])).c_str());
-
-      hist->GetXaxis()->SetTitle("Leakage energy (GeV)"); 
-      hist->GetYaxis()->SetTitle("Events/8 keV");
-      if ( l == 0){hist->SetLineColor(4);}
-      if ( l == 1){hist->SetLineColor(2);}
-      if ( l == 2){hist->SetLineColor(1);}
-      if ( l == 3){hist->SetLineColor(3);}
-      if ( l == 4){hist->SetLineColor(5);}
-      if ( l == 5){hist->SetLineColor(6);}
-    
+      
+      //For the leakage
+      //------------------------------------------------------------------------------------------------
+      hist1 = (TH1F*)results[k]->Get(("h_Leakagefrombehind_" + IntToString(particleenergies[l])).c_str());
+      titleofplot1 = "Leakage energy behind calorimeter for "; 
+      titleofplot2 =  particle +  " beam particle gun"; 
+      titleofplot = titleofplot1 + titleofplot2;
+      hist1->SetTitle(titleofplot); 
+      hist1->GetXaxis()->SetTitle("Leakage energy (GeV)"); 
+      hist1->GetYaxis()->SetTitle("Events/1 GeV");
+      c1->SetLogy();
+      if ( l == 0){hist1->SetLineColor(4);}
+      if ( l == 1){hist1->SetLineColor(2);}
+      if ( l == 2){hist1->SetLineColor(1);}
+      if ( l == 3){hist1->SetLineColor(3);}
+      if ( l == 4){hist1->SetLineColor(5);}
+      if ( l == 5){hist1->SetLineColor(6);}
       //hist->SetLineColor(l+1);
-      leg->AddEntry(hist, procNa[l], "L");
+      leg1->AddEntry(hist1, procNa[l], "L");
       //hist->GetYaxis()->SetRangeUser(0.,900.);//  21: 100. 22: 900.
-
       c1->cd();
       c1->Update(); 
-      l == 0 ? hist->Draw("HIST") : hist->Draw("HISTsame");
-      l == 0 ? leg->Draw() : leg->Draw("same");
+      l == 0 ? hist1->Draw("HIST") : hist1->Draw("HISTsame");
+      l == 0 ? leg1->Draw() : leg1->Draw("same");
+      c1->Update(); 
 
+      //For the loss in sensors
+      //------------------------------------------------------------------------------------------------
+      c2->cd();
+      hist2 = (TH1F*)results[k]->Get(("h_lossinsilicon_" + IntToString(particleenergies[l])).c_str());
+      titleofplot1 = "Energy loss in silicon sensors for "; 
+      titleofplot2 =  particle +  " beam particle gun"; 
+      titleofplot = titleofplot1 + titleofplot2;
+      hist2->SetTitle(titleofplot); 
+      hist2->GetXaxis()->SetTitle("Energy loss in silicon sensors (MeV)"); 
+      hist2->GetYaxis()->SetTitle("Events/1 MeV");
+      c2->SetLogy();
+      if ( l == 0){hist2->SetLineColor(4);}
+      if ( l == 1){hist2->SetLineColor(2);}
+      if ( l == 2){hist2->SetLineColor(1);}
+      if ( l == 3){hist2->SetLineColor(3);}
+      if ( l == 4){hist2->SetLineColor(5);}
+      if ( l == 5){hist2->SetLineColor(6);}
+      //hist->SetLineColor(l+1);
+      leg2->AddEntry(hist2, procNa[l], "L");
+      //hist->GetYaxis()->SetRangeUser(0.,900.);//  21: 100. 22: 900.
+      c2->Update(); 
+      l == 0 ? hist2->Draw("HIST") : hist2->Draw("HISTsame");
+      l == 0 ? leg2->Draw() : leg2->Draw("same");
+      c2->Update(); 
+
+      //For the loss before calo
+      //------------------------------------------------------------------------------------------------
+      c3->cd();
+      hist3 = (TH1F*)results[k]->Get(("h_lossbeforecalo_" + IntToString(particleenergies[l])).c_str());
+      titleofplot1 = "Energy loss before calorimeter for "; 
+      titleofplot2 =  particle +  " beam particle gun"; 
+      titleofplot = titleofplot1 + titleofplot2;
+      hist3->SetTitle(titleofplot); 
+      hist3->GetXaxis()->SetTitle("Energy loss before calorimeter (GeV)"); 
+      hist3->GetYaxis()->SetTitle("Events/1 GeV");
+      c3->SetLogy();
+      if ( l == 0){hist3->SetLineColor(4);}
+      if ( l == 1){hist3->SetLineColor(2);}
+      if ( l == 2){hist3->SetLineColor(1);}
+      if ( l == 3){hist3->SetLineColor(3);}
+      if ( l == 4){hist3->SetLineColor(5);}
+      if ( l == 5){hist3->SetLineColor(6);}
+      //hist->SetLineColor(l+1);
+      leg3->AddEntry(hist3, procNa[l], "L");
+      //hist->GetYaxis()->SetRangeUser(0.,900.);//  21: 100. 22: 900.
+      c3->Update(); 
+      l == 0 ? hist3->Draw("HIST") : hist3->Draw("HISTsame");
+      l == 0 ? leg3->Draw() : leg3->Draw("same");
+      c3->Update(); 
+      //For the loss in passive layers
+      //------------------------------------------------------------------------------------------------
+      c4->cd();
+      hist4 = (TH1F*)results[k]->Get(("h_lossinpassivelayers_" + IntToString(particleenergies[l])).c_str());
+      titleofplot1 = "Energy loss in passive layers for "; 
+      titleofplot2 =  particle +  " beam particle gun"; 
+      titleofplot = titleofplot1 + titleofplot2;
+      hist4->SetTitle(titleofplot); 
+      hist4->GetXaxis()->SetTitle("Energy loss in passive layers (GeV)"); 
+      hist4->GetYaxis()->SetTitle("Events/1 GeV");
+      c4->SetLogy();
+      if ( l == 0){hist4->SetLineColor(4);}
+      if ( l == 1){hist4->SetLineColor(2);}
+      if ( l == 2){hist4->SetLineColor(1);}
+      if ( l == 3){hist4->SetLineColor(3);}
+      if ( l == 4){hist4->SetLineColor(5);}
+      if ( l == 5){hist4->SetLineColor(6);}
+      //hist->SetLineColor(l+1);
+      leg4->AddEntry(hist4, procNa[l], "L");
+      //hist->GetYaxis()->SetRangeUser(0.,900.);//  21: 100. 22: 900.
+      c4->Update(); 
+      l == 0 ? hist4->Draw("HIST") : hist4->Draw("HISTsame");
+      l == 0 ? leg4->Draw() : leg4->Draw("same");
+      c4->Update(); 
+
+      
     }//Loop on energies
+    
+    results_com[k]= new TFile(res_com[k],"recreate");
+    
+    //======================================================================================
+    //Write canvas with combined plot 
+    // c1->Print("Leakage.pdf",".pdf");
+    c1->Write();
+    c2->Write();
+    c3->Write();
+    c4->Write();
+    //Reset histos
+    // hist->Reset();
 
+    results_com[k]->Close();
   
   }//Loop on configs
 
