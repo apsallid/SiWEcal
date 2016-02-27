@@ -48,7 +48,7 @@ int main(){//main
   // const int numberofpads = 12; 
   //======================================================================================
   //Particle type and energy
-  TString particle = "mu-"; //mu+
+  TString particle = "pi+"; //mu+
   const int numberofenergies = 6; // 15 30 50 80 100 150
   //const int numberofenergies = 1; // 15 30 50 80 100 150
  // int particleenergy = 15;
@@ -119,7 +119,8 @@ int main(){//main
 	// files[k][l][j] = TFile::Open("/afs/cern.ch/work/a/apsallid/CMS/Geant4/SiWEcal/"+filename[k][l][j]+".root");
 	// files[k][l] = TFile::Open("/tmp/apsallid/Configs/"+filename[k][l]+".root");
 	// lTree[k][l] = (TTree*) files[k][l]->Get("SiWEcalSSTree");
-	lChain[k][l]->Add("/tmp/apsallid/"+filename[k][l][j]+".root");
+	// lChain[k][l]->Add("/tmp/apsallid/"+filename[k][l][j]+".root");
+	lChain[k][l]->Add("root://eoscms//eos/cms/store/group/phys_b2g/apsallid/SiWEcal/DetectorConfigurations/Config_3/"+filename[k][l][j]+".root");
       }
     }
   }
@@ -148,12 +149,16 @@ int main(){//main
   //Loss in silicon
   std::vector<TH1F*> h_lossinsilicon;
   h_lossinsilicon.clear();
+  //Total Loss
+  std::vector<TH1F*> h_totalloss;
+  h_totalloss.clear();
 
   for (Int_t k=0; k<numberofenergies; k++){
     h_Leakagefrombehind.push_back(new TH1F(("h_Leakagefrombehind_" + IntToString(particleenergies[k])).c_str(),";E (GeV);SimHits",160,0.,160.));
     h_lossbeforecalo.push_back(new TH1F(("h_lossbeforecalo_" + IntToString(particleenergies[k])).c_str(),";E (GeV);SimHits",160,0.,160.));
     h_lossinpassivelayers.push_back(new TH1F(("h_lossinpassivelayers_" + IntToString(particleenergies[k])).c_str(),";E (GeV);SimHits",160,0.,160.));
-    h_lossinsilicon.push_back(new TH1F(("h_lossinsilicon_" + IntToString(particleenergies[k])).c_str(),";E (MeV);SimHits",250,0.,250.));
+    h_lossinsilicon.push_back(new TH1F(("h_lossinsilicon_" + IntToString(particleenergies[k])).c_str(),";E (MeV);SimHits",500,0.,500.));
+    h_totalloss.push_back(new TH1F(("h_totalloss_" + IntToString(particleenergies[k])).c_str(),";E (GeV);SimHits",200,0.,200.));
   }
 
   //======================================================================================
@@ -179,9 +184,11 @@ int main(){//main
 	// 	// if (ievt != 0) {continue;}
       	lChain[k][l]->GetEntry(ievt);
 	if (ievt%(10000)==0) std::cout << "Entry " << ievt << std::endl;
+	if (ievt==10000){break;}
 	// std::cout << "Entry " << ievt << std::endl;
 	double losseverywherebuttheendandsensors = 0.;
 	double lossinsensors = 0.;
+	double totalloss = 0.;
 	//Loop on sampling sections
 	for(unsigned iL(0); iL<(*ssvec).size(); iL++){
 	  // SiWEcalSSSamplingSection lSamSec = (*ssvec)[iL];
@@ -202,9 +209,12 @@ int main(){//main
 	  if (iL!=3){
 	    lossinsensors = lossinsensors + (*ssvec)[iL].measuredE(); //in MeV
 	  }
+	  //Total loss
+	  totalloss = totalloss + ((*ssvec)[iL].measuredE()/1000.) + ((*ssvec)[iL].absorberE()/1000.); 
 	  if (iL==4){
 	    h_lossinpassivelayers[l]->Fill( losseverywherebuttheendandsensors  );//in GeV
 	    h_lossinsilicon[l]->Fill( lossinsensors );//in MeV
+	    h_totalloss[l]->Fill( totalloss  );//in GeV
 	  }
 
 	} //loop on sampling sections
@@ -217,6 +227,7 @@ int main(){//main
       h_lossbeforecalo[l]->Write();
       h_lossinpassivelayers[l]->Write();
       h_lossinsilicon[l]->Write();
+      h_totalloss[l]->Write();
 
       //======================================================================================
       //We should here clear the histograms because we want them empty for the next file. 
@@ -225,7 +236,8 @@ int main(){//main
       h_lossbeforecalo[l]->Reset();
       h_lossinpassivelayers[l]->Reset();
       h_lossinsilicon[l]->Reset();
-
+      h_totalloss[l]->Reset();
+      
     }//Loop on energies
    
     results[k]->Close();
@@ -238,6 +250,7 @@ int main(){//main
   TCanvas* c2 = new TCanvas("c2", "  ");
   TCanvas* c3 = new TCanvas("c3", "  ");
   TCanvas* c4 = new TCanvas("c4", "  ");
+  TCanvas* c5 = new TCanvas("c5", "  ");
   //For the legend
   // TLegend* leg[numberoffiles];
   TLegend* leg1 = new TLegend(0.5, 0.7, 0.8, 0.9);
@@ -252,6 +265,9 @@ int main(){//main
   TLegend* leg4 = new TLegend(0.5, 0.7, 0.8, 0.9);
   leg4->SetHeader("Energy");
   leg4->SetFillColor(17);
+  TLegend* leg5 = new TLegend(0.5, 0.7, 0.8, 0.9);
+  leg5->SetHeader("Energy");
+  leg5->SetFillColor(17);
 
   TString procNa[numberofenergies];
   procNa[0] = "15 GeV";
@@ -270,7 +286,7 @@ int main(){//main
     res_com[k] = fp + "_combinedplots.root";
     //std::cout << res[k] << std::endl;
   }
-  TH1F* hist1,* hist2,* hist3,* hist4;
+  TH1F* hist1,* hist2,* hist3,* hist4,* hist5;
 
   TString titleofplot1,titleofplot2,titleofplot; 
   for (int k=0; k<numberofconfigs; k++){
@@ -379,6 +395,30 @@ int main(){//main
       l == 0 ? hist4->Draw("HIST") : hist4->Draw("HISTsame");
       l == 0 ? leg4->Draw() : leg4->Draw("same");
       c4->Update(); 
+      //For the total loss
+      //------------------------------------------------------------------------------------------------
+      c5->cd();
+      hist5 = (TH1F*)results[k]->Get(("h_totalloss_" + IntToString(particleenergies[l])).c_str());
+      titleofplot1 = "Total Energy loss for "; 
+      titleofplot2 =  particle +  " beam particle gun"; 
+      titleofplot = titleofplot1 + titleofplot2;
+      hist5->SetTitle(titleofplot); 
+      hist5->GetXaxis()->SetTitle("Total Energy loss (GeV)"); 
+      hist5->GetYaxis()->SetTitle("Events/1 GeV");
+      c5->SetLogy();
+      if ( l == 0){hist5->SetLineColor(4);}
+      if ( l == 1){hist5->SetLineColor(2);}
+      if ( l == 2){hist5->SetLineColor(1);}
+      if ( l == 3){hist5->SetLineColor(3);}
+      if ( l == 4){hist5->SetLineColor(5);}
+      if ( l == 5){hist5->SetLineColor(6);}
+      //hist->SetLineColor(l+1);
+      leg5->AddEntry(hist5, procNa[l], "L");
+      //hist->GetYaxis()->SetRangeUser(0.,900.);//  21: 100. 22: 900.
+      c5->Update(); 
+      l == 0 ? hist5->Draw("HIST") : hist5->Draw("HISTsame");
+      l == 0 ? leg5->Draw() : leg5->Draw("same");
+      c5->Update(); 
 
       
     }//Loop on energies
@@ -392,6 +432,7 @@ int main(){//main
     c2->Write();
     c3->Write();
     c4->Write();
+    c5->Write();
     //Reset histos
     // hist->Reset();
 
