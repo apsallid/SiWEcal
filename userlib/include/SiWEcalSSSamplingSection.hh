@@ -17,6 +17,9 @@ public:
     volLambdatrans_(0),
     measuredE_(0),
     absorberE_(0),
+    beforecaloE_(0),
+    leakageE_(0),
+    passiveE_(0),
     totalE_(0),
     gFrac_(0),
     eFrac_(0),
@@ -51,6 +54,9 @@ public:
   };
   inline double absorberE() const{
     return absorberE_;
+  };
+  inline double passiveE() const{
+    return passiveE_;
   };
   inline double totalE() const{
     return totalE_;
@@ -96,6 +102,15 @@ public:
   inline void absorberE(const double & aVal){
     absorberE_ = aVal;
   };
+  inline void beforecaloE(const double & aVal){
+    beforecaloE_ = aVal;
+  };
+  inline void leakageE(const double & aVal){
+    leakageE_ = aVal;
+  }
+  inline void passiveE(const double & aVal){
+    passiveE_ = aVal;
+  };
   inline void totalE(const double & aVal){
     totalE_ = aVal;
   };
@@ -128,6 +143,9 @@ private:
   double volLambdatrans_;
   double measuredE_;
   double absorberE_;
+  double beforecaloE_;
+  double leakageE_;
+  double passiveE_;
   double totalE_;
   double gFrac_;
   double eFrac_;

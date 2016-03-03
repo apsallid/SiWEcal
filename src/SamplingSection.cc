@@ -195,6 +195,33 @@ G4double SamplingSection::getAbsorbedEnergy()
   return val;
 }
 
+// G4double SamplingSection::getBeforeCaloEnergy()
+// {
+//   double val=0;  
+//   for (unsigned ie(0); ie<n_elements;++ie){
+//     if (isBeforeCaloElement(ie)) val += ele_den[ie];
+//   }
+//   return val;
+// }
+
+// G4double SamplingSection::getLeakageEnergy()
+// {
+//   double val=0;  
+//   for (unsigned ie(0); ie<n_elements;++ie){
+//     if (isAfterLastSensorElement(ie)) val += ele_den[ie];
+//   }
+//   return val;
+// }
+
+G4double SamplingSection::getPassiveLayerEnergy()
+{
+  double val=0;  
+  for (unsigned ie(0); ie<n_elements;++ie){
+    if (isPassiveElement(ie)) val += ele_den[ie];
+  }
+  return val;
+}
+
 //
 G4double SamplingSection::getTotalEnergy()
 {

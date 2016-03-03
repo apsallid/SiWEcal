@@ -69,7 +69,7 @@ OBJS=$(subst $(SRCDIR), $(OBJDIR),$(subst cc,$(OBJ_EXT),$(SRCS)))
 
 #BINS=$(EXEDIR)/getAbsorberWeight
 
-BINS=$(EXEDIR)/mipDeposit $(EXEDIR)/mipEvolution $(EXEDIR)/validation
+BINS=$(EXEDIR)/mipDeposit $(EXEDIR)/mipEvolution $(EXEDIR)/validation $(EXEDIR)/Leakage $(EXEDIR)/Calibration $(EXEDIR)/RecoE
 
 #BINS=$(EXEDIR)/egammaResolution $(EXEDIR)/higgsResolution
 
@@ -144,6 +144,15 @@ $(EXEDIR)/mipDeposit:  $(TESTDIR)/mipDeposit.cpp $(LIBDIR)/lib$(LIBNAME).so $(wi
 	$(CXX) -o $@ $(CXXFLAGS) $< $(LIBS) -L$(LIBDIR) -l$(LIBNAME)
 
 $(EXEDIR)/mipEvolution:  $(TESTDIR)/mipEvolution.cpp $(LIBDIR)/lib$(LIBNAME).so $(wildcard $(BASEDIR)/include/*.h*)
+	$(CXX) -o $@ $(CXXFLAGS) $< $(LIBS) -L$(LIBDIR) -l$(LIBNAME)
+
+$(EXEDIR)/Leakage:  $(TESTDIR)/Leakage.cpp $(LIBDIR)/lib$(LIBNAME).so $(wildcard $(BASEDIR)/include/*.h*)
+	$(CXX) -o $@ $(CXXFLAGS) $< $(LIBS) -L$(LIBDIR) -l$(LIBNAME)
+
+$(EXEDIR)/RecoE:  $(TESTDIR)/RecoE.cpp $(LIBDIR)/lib$(LIBNAME).so $(wildcard $(BASEDIR)/include/*.h*)
+	$(CXX) -o $@ $(CXXFLAGS) $< $(LIBS) -L$(LIBDIR) -l$(LIBNAME)
+
+$(EXEDIR)/Calibration:  $(TESTDIR)/Calibration.cpp $(LIBDIR)/lib$(LIBNAME).so $(wildcard $(BASEDIR)/include/*.h*)
 	$(CXX) -o $@ $(CXXFLAGS) $< $(LIBS) -L$(LIBDIR) -l$(LIBNAME)
 
 $(EXEDIR)/mipStudy:  $(TESTDIR)/mipStudy.cpp $(LIBDIR)/lib$(LIBNAME).so $(wildcard $(BASEDIR)/include/*.h*)

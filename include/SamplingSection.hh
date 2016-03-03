@@ -108,11 +108,55 @@ public:
   inline bool isAbsorberElement(const unsigned & aEle){
     if (aEle < n_elements && 
 	(
+	 ele_name[aEle] == "Fe" || ele_name[aEle] == "Air" ||
+	 ele_name[aEle] == "W"  || ele_name[aEle] == "Plexiglass" ||
+	 ele_name[aEle] == "PVC"  || ele_name[aEle] == "PCB" ||
+	 ele_name[aEle] == "Al" ||
 	 ele_name[aEle] == "Pb" || ele_name[aEle] == "Cu" || 
-	 ele_name[aEle] == "W" || ele_name[aEle] == "Brass" ||
-	 ele_name[aEle] == "Fe" || ele_name[aEle] == "Steel" || 
+	 ele_name[aEle] == "Brass" ||
 	 ele_name[aEle] == "SSteel" || ele_name[aEle] == "Al" ||
 	 ele_name[aEle] == "WCu" || ele_name[aEle] == "NeutMod"
+	 )
+	) return true;
+    return false;
+  };
+
+  //To see if the element is before calo we should check here only the 
+  //first two elements of the sampling section and later in the 
+  //EventAction.cc to restrict only to the first sampling section
+  //because in this case we will add energy that it is not before calo but in 
+  //a later sampling section where there is Fe and Air. 
+  //This is not going to happen in our 11 configuration but just to be on the 
+  //safe side. 
+  // inline bool isBeforeCaloElement(const unsigned & aEle){
+  //   //Hardcoded here
+  //   if (aEle < 2 
+  // 	&& ( ele_name[aEle] == "Fe" || ele_name[aEle] == "Air" ) 
+  // 	) {return true;}
+  //   return false;
+  // };
+
+  //To see if the element is after last sensor in order to add his 
+  //energy to the one that leaked in the back. We should combine this 
+  //with a restriction to the EventAction.cc to only the last layers. 
+  // inline bool isAfterLastSensorElement(const unsigned & aEle){
+  //   //Hardcoded here 23 is Al 24 is Air since we are not considering 
+  //   //elements with 0 thickness. In this case in DetectorConstruction.cc
+  //   //number of elements are more, 29 in the current setup we are working. 
+  //   if ( (aEle > 22 
+  // 	&& ( ele_name[aEle] == "Al" || ele_name[aEle] == "Air" ) 
+  // 	  ) || ( ele_name[aEle] == "SSteel" &&  n_elements == 1 ) ) {return true;}
+  //   return false;
+  // }
+  
+  //This will add also the energy before calo but will subtract it  
+  inline bool isPassiveElement(const unsigned & aEle){
+    if (aEle < n_elements &&  
+	(
+	 ele_name[aEle] == "Fe" || ele_name[aEle] == "Air" ||
+	 ele_name[aEle] == "W"  || ele_name[aEle] == "Plexiglass" ||
+	 ele_name[aEle] == "PVC"  || ele_name[aEle] == "PCB" ||
+	 ele_name[aEle] == "Al" 
 	 )
 	) return true;
     return false;
@@ -121,14 +165,14 @@ public:
   //reset
   inline void resetCounters()
   {
-    ele_den.resize(n_elements,0);
-    ele_dl.resize(n_elements,0);
-    sens_time.resize(n_sens_elements,0);
-    sens_gFlux.resize(n_sens_elements,0);
-    sens_eFlux.resize(n_sens_elements,0);
-    sens_muFlux.resize(n_sens_elements,0);
-    sens_neutronFlux.resize(n_sens_elements,0);
-    sens_hadFlux.resize(n_sens_elements,0);
+    ele_den.clear();ele_den.resize(n_elements,0);
+    ele_dl.clear();ele_dl.resize(n_elements,0);
+    sens_time.clear();sens_time.resize(n_sens_elements,0);
+    sens_gFlux.clear();sens_gFlux.resize(n_sens_elements,0);
+    sens_eFlux.clear();sens_eFlux.resize(n_sens_elements,0);
+    sens_muFlux.clear();sens_muFlux.resize(n_sens_elements,0);
+    sens_neutronFlux.clear();sens_neutronFlux.resize(n_sens_elements,0);
+    sens_hadFlux.clear();sens_hadFlux.resize(n_sens_elements,0);
     //reserve some space based on first event....
     for (unsigned idx(0); idx<n_sens_elements; ++idx){
       if (sens_HitVec[idx].size() > sens_HitVec_size_max) {
@@ -143,6 +187,9 @@ public:
   //
   G4double getMeasuredEnergy(bool weighted=true);
   G4double getAbsorbedEnergy();
+  G4double getBeforeCaloEnergy();
+  G4double getLeakageEnergy();
+  G4double getPassiveLayerEnergy();
   G4double getTotalEnergy();
   G4double getAbsorberX0();  
   G4double getAbsorberdEdx();  

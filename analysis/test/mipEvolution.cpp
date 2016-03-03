@@ -66,7 +66,8 @@ int main(){//main
   TFile* files[numberoffiles];
   for (int k=0; k<numberoffiles; k++){
     // files[k]= new TFile(filename[k]);
-    files[k] = TFile::Open("/afs/cern.ch/work/a/apsallid/CMS/Geant4/SiWEcal/Parallel/testingfile/"+filename[k]+".root");
+    //    files[k] = TFile::Open("/afs/cern.ch/work/a/apsallid/CMS/Geant4/SiWEcal/Parallel/testingfile/"+filename[k]+".root");
+    files[k] = TFile::Open("/tmp/apsallid/Configs/"+filename[k]+"*.root");
     lTree[k] = (TTree*) files[k]->Get("SiWEcalSSTree");
     if (!lTree[k]){
       std::cout << " -- Error, tree cannot be opened. Exiting..." << std::endl;

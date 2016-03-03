@@ -141,8 +141,13 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	G4cout << "[DetectorConstruction] starting SiWECAL_B84X0W_I0X0_A0 8.4 X_0 with Tungsten" << G4endl;
 	std::vector<G4double> lThick;
 	std::vector<std::string> lEle;
+	//Before calo here
 	lThick.push_back(3.3*mm);lEle.push_back("Fe"); // This is for the front wall -- Check and correct 
 	lThick.push_back(40.0*mm);lEle.push_back("Air"); // Gap between front wall and absorber
+	m_caloStruct.push_back( SamplingSection(lThick,lEle) );
+	lThick.clear();
+	lEle.clear();
+	//Starting calo first layer here
 	lThick.push_back(8.4*3.504*mm);lEle.push_back("W");
 	lThick.push_back(4.0*mm);lEle.push_back("Air"); // Gap between before absorber and plexiglass
 	lThick.push_back(18.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
@@ -158,22 +163,46 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	lThick.push_back(0.325*mm);lEle.push_back("Si");
 	lThick.push_back(0.325*mm);lEle.push_back("Si");
 	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	m_caloStruct.push_back( SamplingSection(lThick,lEle) );
+	lThick.clear();
+	lEle.clear();
+	
+	//Next 3 layers here - 4th layer that wasn't read out
 	//plastic plate here 
 	//kapton here
         lThick.push_back(25.0*mm);lEle.push_back("Al");
 	lThick.push_back(23.0*mm);lEle.push_back("Air");
+	lThick.push_back(18.0*mm);lEle.push_back("Plexiglass"); // Plexiglass to press the connections of PCB to adaptor board
+	
+	//This is for the 16 SKIROC chips
+	for(unsigned i=0; i<nChips; i++) {
+	  lThick.push_back(1.1*mm);lEle.push_back("PVC"); // Will correct this to be the material of SKIROC
+	}
+	lThick.push_back(1.6*mm);lEle.push_back("PCB");	
+	lThick.push_back(0.2*mm);lEle.push_back("Air"); // this is for the glue dots
+	lThick.push_back(0.325*mm);lEle.push_back("Si"); // For visualization increase the thickness of Si Sensors by a factor of 5
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
+	lThick.push_back(0.325*mm);lEle.push_back("Si");
 
+	//Putting also the 4th layer that wasn't read out just in case of back scattering
+	//That is 4 - 1 that already put = 3 layers here
 	unsigned nLay = 3;
 	for(unsigned i=0; i<nLay; i++) {
-	  if(i!=0){
-	    //Front wall, gap, absorber, gap only in first layer
-	    lThick[0] = 0.0*mm; 
-	    lThick[1] = 0.0*mm; 
-	    lThick[2] = 0.0*mm; 
-	    lThick[3] = 0.0*mm; 
-	  }
 	  m_caloStruct.push_back( SamplingSection(lThick,lEle) );
 	}
+	//Will put an infinite volume here to collect the losses/leakage behind the end of the detector
+	lThick.clear();
+	lEle.clear();
+	//plastic plate here 
+	//kapton here
+        lThick.push_back(25.0*mm);lEle.push_back("Al");
+	lThick.push_back(23.0*mm);lEle.push_back("Air");
+	lThick.push_back(1000.*m);lEle.push_back("SSteel");
+
+	m_caloStruct.push_back( SamplingSection(lThick,lEle) );
+
+
 	break;
       }
     case v_SiWECAL_B84X0W200Fe_I0X0_A0:
@@ -203,7 +232,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	//kapton here
         lThick.push_back(25.0*mm);lEle.push_back("Al");
 	lThick.push_back(23.0*mm);lEle.push_back("Air");
-
+	
 	unsigned nLay = 3;
 	for(unsigned i=0; i<nLay; i++) {
 	  if(i!=0){
@@ -216,6 +245,7 @@ DetectorConstruction::DetectorConstruction(G4int ver, G4int mod)
 	  }
 	  m_caloStruct.push_back( SamplingSection(lThick,lEle) );
 	}
+
 	break;
       }
     case v_SiWECAL_B84X0W300Fe_I0X0_A0:
@@ -725,6 +755,8 @@ void DetectorConstruction::buildStack(const unsigned sectorNum)
 	G4double width = 177.16*mm; //Hardcoded should fix these
 	G4double height = 17.0*mm; //For SKIROC
 	if (skirocvol){width = 17.0*mm;}
+
+	if (eleName=="SSteel") {width = 1000.*m; height = 1000.*m;}
 
 	if(thick>0){
 	  solid = constructSolid(baseName,width,height,thick,sivol,skirocvol);

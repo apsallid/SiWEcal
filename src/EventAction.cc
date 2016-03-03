@@ -31,7 +31,7 @@ EventAction::EventAction()
 	    << " model = " << info->model() << std::endl;
   outF_->WriteObjectAny(info,"SiWEcalSSInfo","Info");
 
-  tree_=new TTree("SiWEcalSSTree","HGC Standalone simulation tree");
+  tree_=new TTree("SiWEcalSSTree","SiEcal Standalone simulation tree");
   tree_->Branch("SiWEcalSSEvent","SiWEcalSSEvent",&event_);
   tree_->Branch("SiWEcalSSSamplingSectionVec","std::vector<SiWEcalSSSamplingSection>",&ssvec_);
   tree_->Branch("SiWEcalSSSimHitVec","std::vector<SiWEcalSSSimHit>",&hitvec_);
@@ -59,10 +59,20 @@ void EventAction::BeginOfEventAction(const G4Event* evt)
 {  
   evtNb_ = evt->GetEventID();
   if (evtNb_%printModulo == 0) { 
-    G4cout << "\n---> Begin of event: " << evtNb_ << G4endl;
-    CLHEP::HepRandom::showEngineStatus();
+  G4cout << "\n---> Begin of event: " << evtNb_ << G4endl;
+  CLHEP::HepRandom::showEngineStatus();
   }
   //fout_ << "Event " << evtNb_ << std::endl;
+
+  // G4VPhysicalVolume *volumeclean;
+  
+  // Detect(0.,0.,0.,0,volume,position,trackID,parentID,genPart);
+    // for(size_t i=0; i<detector_->size(); i++) 
+    // {
+    //   (*detector_)[i].resetCounters();
+    //   std::cout << "Sampling section " << i << " absorberE after reset in begin" <<  (*detector_)[i].getAbsorbedEnergy() << std::endl;
+
+    // }
 
 }
 
@@ -119,6 +129,16 @@ void EventAction::EndOfEventAction(const G4Event* g4evt)
       lSec.voldEdx((*detector_)[i].getAbsorberdEdx());
       lSec.volLambdatrans((*detector_)[i].getAbsorberLambda());
       lSec.absorberE((*detector_)[i].getAbsorbedEnergy());
+      lSec.passiveE((*detector_)[i].getPassiveLayerEnergy());
+      // if (i==0){
+      // 	lSec.beforecaloE((*detector_)[i].getBeforeCaloEnergy());
+      // }
+      //Add leakage in layer 4 and 2. 3 is dead (numbers starts from 0,1,2,3,4 = 5 layers in our scheme)
+      //In dead layer we will add the total energy for the leakage
+      //IMPORTANT!!: In a non-TB setup with not a dead layer you should change the following line!!
+      // if ( (i==2) || (i==4) ){
+      // 	 lSec.leakageE((*detector_)[i].getLeakageEnergy());
+      //  }
       lSec.measuredE((*detector_)[i].getMeasuredEnergy(false));
       lSec.totalE((*detector_)[i].getTotalEnergy());
       lSec.gFrac((*detector_)[i].getPhotonFraction());
@@ -132,6 +152,7 @@ void EventAction::EndOfEventAction(const G4Event* g4evt)
       if (evtNb_==1) std::cout << "if (layer==" << i << ") return " 
 			       <<  lSec.voldEdx() << ";"
 			       << std::endl;
+      // std::cout << "Sampling section " << i << " absorberE " << lSec.absorberE()  <<std::endl;
       //std::cout << " n_sens_ele = " << (*detector_)[i].n_sens_elements << std::endl;
 
       for (unsigned idx(0); idx<(*detector_)[i].n_sens_elements; ++idx){
@@ -163,6 +184,7 @@ void EventAction::EndOfEventAction(const G4Event* g4evt)
       }
       //if (i==0) G4cout << " ** evt " << evt->GetEventID() << G4endl;
       (*detector_)[i].resetCounters();
+      // std::cout << "Sampling section " << i << " absorberE after reset " <<  (*detector_)[i].getAbsorbedEnergy() << std::endl;
     }
   if(debug){
     G4cout << " -- Number of truth particles = " << genvec_.size() << G4endl

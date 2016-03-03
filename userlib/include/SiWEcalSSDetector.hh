@@ -60,7 +60,7 @@ public:
     //fill layer indices
     if (versionNumber!=0){
       indices_[0] = 0;
-      indices_[1] = 12;
+      indices_[1] = 16;
     }
 
 

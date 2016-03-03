@@ -11,8 +11,8 @@
 
 #particle gun
 /gun/particle e-
-/gun/energy 10 GeV
+/gun/energy 15 GeV
 #/gun/direction 1 0 0
 
 #events
-/run/beamOn 10
+/run/beamOn 100

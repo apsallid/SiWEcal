@@ -28,7 +28,7 @@
 int main(int argc, char** argv){//main
 
 
-  TString lSuffix = "SiWEcal_100kevents"; //SiWEcal_2
+  TString lSuffix = "SiWEcal_15GeVmuon_100kevents"; //SiWEcal_2
   TString plotBase = "PLOTS/SiWEcal_2/mu-";
 
   TFile *inputFile = TFile::Open("/afs/cern.ch/work/a/apsallid/CMS/Geant4/SiWEcal/"+lSuffix+".root");
@@ -111,7 +111,7 @@ int main(int argc, char** argv){//main
   gStyle->SetOptStat(1111110);
   gStyle->SetOptFit(1111);
   p_hitEnergy_si->Draw();
-  p_hitEnergy_si->Fit("landau","R+","",0.035,1);
+  p_hitEnergy_si->Fit("landau","R+","",0.069,0.18);
 
   myc->Update();
   myc->Print(plotBase+"/mipDepositAll_si.png");

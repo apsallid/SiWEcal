@@ -123,6 +123,9 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     x0 = (G4RandFlat::shoot(0.,30.)-15)*mm;
     y0 = (G4RandFlat::shoot(0.,30.)-15)*mm;
   }
+  
+  //Put the gun close to the calorimeter and spread the beam a little bit (2 cm) in x and y. 
+  z0 = -100.0*mm; x0 = (G4RandGauss::shoot(0.,2.))*cm; y0 = (G4RandGauss::shoot(0.,2.))*cm;
 
   particleGun->SetParticlePosition(G4ThreeVector(x0,y0,z0));
   G4cout << " -- Gun position set to: " << x0 << "," << y0 << "," << z0 << G4endl;

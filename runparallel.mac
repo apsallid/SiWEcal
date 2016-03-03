@@ -14,4 +14,4 @@
 
 /gun/particle PARTICLEGUN 
 /gun/energy ENERGYOFGUN GeV
-/run/beamOn 10000 
+/run/beamOn 1000 
